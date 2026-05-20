@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desabafo anônimo</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+<header>
+  <h1>Espaço Seguro</h1>
+  <p class="aviso">Este site não substitui ajuda profissional</p>
+</header>
+
+<main class="container">
+
+  <section class="input-box">
+    <h2>Quer desabafar?</h2>
+
+    <textarea id="texto" placeholder="Escreva o que você está sentindo..."></textarea>
+
+    <div class="linha">
+      <select id="sentimento">
+        <option value="triste">Tristeza</option>
+        <option value="raiva">Raiva</option>
+        <option value="alivio">Alívio</option>
+      </select>
+
+      <button id="btnPublicar">Publicar</button>
+    </div>
+
+    <p id="feedback"></p>
+  </section>
+
+  <section class="acoes">
+    <button id="btnLimpar">Apagar tudo</button>
+  </section>
+
+  <div class="top-bar">
+  <select id="filtro">
+    <option value="todos">Todos</option>
+    <option value="triste">Tristeza</option>
+    <option value="raiva">Raiva</option>
+    <option value="alivio">Alívio</option>
+  </select>
+
+  <span id="contador"></span>
+</div>
+
+  <section id="feed"></section>
+
+</main>
+
+<script src="main.js"></script>
+</body>
+</html>
