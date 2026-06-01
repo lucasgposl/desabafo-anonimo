@@ -53,3 +53,6 @@ A proposta do projeto é criar um ambiente digital acolhedor, onde qualquer pess
 
 ### Autores
 Lucas Gabriel e Styven
+
+
+
