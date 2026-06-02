@@ -15,11 +15,13 @@ import { InputBox } from './components/InputBox';
 import { MensagemLogin } from './components/MensagemLogin';
 import { FeedControls } from './components/FeedControls';
 import { Feed } from './components/Feed';
+import { Footer } from './components/Footer';
 import { PaginaModeracao } from './components/PaginaModeracao';
 import { RotaProtegidaAdmin } from './components/RotaProtegidaAdmin';
 import { PaginaFeed as PaginaFeedPage } from './pages/PaginaFeed';
 import { PaginaDesabafo } from './pages/PaginaDesabafo';
 import { PaginaTrends } from './pages/PaginaTrends';
+import { PaginaSobre } from './pages/PaginaSobre';
 
 import type { Sentimento, Desabafo } from './types';
 
@@ -153,6 +155,8 @@ function PaginaFeed() {
           />
         )}
       </main>
+
+      <Footer />
     </div>
   );
 }
@@ -167,6 +171,7 @@ function App() {
       <Route path="/feed" element={<PaginaFeedPage />} />
       <Route path="/desabafo/:numero" element={<PaginaDesabafo />} />
       <Route path="/trends" element={<PaginaTrends />} />
+      <Route path="/sobre" element={<PaginaSobre />} />
       <Route
         path="/moderacao"
         element={

@@ -49,7 +49,7 @@ A proposta do projeto é criar um ambiente digital acolhedor, onde qualquer pess
 
 ## Estrutura do projeto
 
-#TODO GERAR PROPOTA
+#TODO GERAR PROPOSTA
 
 ### Autores
 Lucas Gabriel e Styven

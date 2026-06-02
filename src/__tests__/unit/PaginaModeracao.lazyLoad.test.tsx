@@ -4,6 +4,7 @@
  */
 
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
 
 // Mocks
@@ -73,7 +74,7 @@ describe('PaginaModeracao - Carregamento lazy de comentários', () => {
       const comentarios = [criarComentarioMock()];
       mockBuscarComentarios.mockResolvedValue(comentarios);
 
-      render(<PaginaModeracao isAdmin={true} />);
+      render(<MemoryRouter><PaginaModeracao isAdmin={true} /></MemoryRouter>);
 
       await waitFor(() => {
         expect(screen.getByText(/3 comentários/)).toBeInTheDocument();
@@ -96,7 +97,7 @@ describe('PaginaModeracao - Carregamento lazy de comentários', () => {
       const comentarios = [criarComentarioMock()];
       mockBuscarComentarios.mockResolvedValue(comentarios);
 
-      render(<PaginaModeracao isAdmin={true} />);
+      render(<MemoryRouter><PaginaModeracao isAdmin={true} /></MemoryRouter>);
 
       await waitFor(() => {
         expect(screen.getByText(/3 comentários/)).toBeInTheDocument();
@@ -136,7 +137,7 @@ describe('PaginaModeracao - Carregamento lazy de comentários', () => {
         () => new Promise<Comentario[]>((resolve) => { resolveComentarios = resolve; })
       );
 
-      render(<PaginaModeracao isAdmin={true} />);
+      render(<MemoryRouter><PaginaModeracao isAdmin={true} /></MemoryRouter>);
 
       await waitFor(() => {
         expect(screen.getByText(/3 comentários/)).toBeInTheDocument();
@@ -167,7 +168,7 @@ describe('PaginaModeracao - Carregamento lazy de comentários', () => {
         () => new Promise<Comentario[]>((resolve) => { resolveComentarios = resolve; })
       );
 
-      render(<PaginaModeracao isAdmin={true} />);
+      render(<MemoryRouter><PaginaModeracao isAdmin={true} /></MemoryRouter>);
 
       await waitFor(() => {
         expect(screen.getByText(/3 comentários/)).toBeInTheDocument();
@@ -196,7 +197,7 @@ describe('PaginaModeracao - Carregamento lazy de comentários', () => {
     it('deve exibir mensagem de erro dentro da linha se a busca falhar', async () => {
       mockBuscarComentarios.mockRejectedValue(new Error('Network error'));
 
-      render(<PaginaModeracao isAdmin={true} />);
+      render(<MemoryRouter><PaginaModeracao isAdmin={true} /></MemoryRouter>);
 
       await waitFor(() => {
         expect(screen.getByText(/3 comentários/)).toBeInTheDocument();
@@ -215,7 +216,7 @@ describe('PaginaModeracao - Carregamento lazy de comentários', () => {
     it('deve manter a linha expandida (toggle ativo) após erro', async () => {
       mockBuscarComentarios.mockRejectedValue(new Error('Network error'));
 
-      render(<PaginaModeracao isAdmin={true} />);
+      render(<MemoryRouter><PaginaModeracao isAdmin={true} /></MemoryRouter>);
 
       await waitFor(() => {
         expect(screen.getByText(/3 comentários/)).toBeInTheDocument();
@@ -239,7 +240,7 @@ describe('PaginaModeracao - Carregamento lazy de comentários', () => {
       // First call fails
       mockBuscarComentarios.mockRejectedValueOnce(new Error('Network error'));
 
-      render(<PaginaModeracao isAdmin={true} />);
+      render(<MemoryRouter><PaginaModeracao isAdmin={true} /></MemoryRouter>);
 
       await waitFor(() => {
         expect(screen.getByText(/3 comentários/)).toBeInTheDocument();

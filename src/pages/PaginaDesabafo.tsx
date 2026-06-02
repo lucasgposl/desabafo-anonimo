@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { LoginButton } from '../components/LoginButton';
 import { ComentarioSection } from '../components/ComentarioSection';
+import { Footer } from '../components/Footer';
 import { useDesabafo } from '../hooks/useDesabafo';
 import { useAuth } from '../hooks/useAuth';
 import { useAdmin } from '../hooks/useAdmin';
@@ -152,6 +153,8 @@ export function PaginaDesabafo() {
           mostrarFormulario={true}
         />
       </main>
+
+      <Footer />
     </div>
   );
 }

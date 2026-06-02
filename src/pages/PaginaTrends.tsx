@@ -9,6 +9,7 @@ import { useReacoes } from '../hooks/useReacoes';
 import { Header } from '../components/Header';
 import { LoginButton } from '../components/LoginButton';
 import { Feed } from '../components/Feed';
+import { Footer } from '../components/Footer';
 
 import type { Desabafo } from '../types';
 import './PaginaTrends.css';
@@ -94,6 +95,8 @@ export function PaginaTrends() {
           />
         )}
       </main>
+
+      <Footer />
     </div>
   );
 }

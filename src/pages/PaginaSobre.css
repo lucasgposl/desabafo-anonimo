@@ -1,0 +1,60 @@
+/* ===========================
+   PaginaSobre - Estilos da página Sobre
+   =========================== */
+
+.pagina-sobre__titulo {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-subtitulo);
+  font-weight: var(--fonte-subtitulo-peso);
+  color: var(--cor-texto);
+  margin: 0 0 1.5rem 0;
+  line-height: 1.4;
+}
+
+.pagina-sobre__secao {
+  margin-bottom: 1.5rem;
+}
+
+.pagina-sobre__secao--aviso {
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.pagina-sobre__subtitulo {
+  font-family: var(--fonte-familia);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--cor-texto);
+  margin: 0 0 0.75rem 0;
+}
+
+.pagina-sobre__texto {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-corpo);
+  color: var(--cor-texto);
+  line-height: 1.7;
+  margin: 0 0 0.75rem 0;
+}
+
+.pagina-sobre__texto:last-child {
+  margin-bottom: 0;
+}
+
+.pagina-sobre__texto strong {
+  color: var(--cor-acento);
+  font-weight: 700;
+}
+
+/* Responsivo */
+@media (max-width: 719px) {
+  .pagina-sobre__titulo {
+    font-size: 1.1rem;
+    margin: 0 0 1rem 0;
+  }
+
+  .pagina-sobre__secao--aviso {
+    padding: 1rem;
+  }
+}

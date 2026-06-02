@@ -27,6 +27,17 @@
   margin: 0;
 }
 
+.header__titulo-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.header__titulo-link:hover,
+.header__titulo-link:focus {
+  text-decoration: none;
+  color: inherit;
+}
+
 .header__aviso {
   font-family: var(--fonte-familia);
   font-size: var(--fonte-secundaria);
@@ -52,6 +63,10 @@
 
 .header__link-nav:hover {
   color: var(--cor-acento-hover);
+}
+
+.header__link-nav--ativo {
+  border-bottom: 2px solid var(--cor-acento);
 }
 
 .header__link-moderacao {

@@ -3,6 +3,7 @@ import { buscarTodosDesabafosAdmin, buscarTodosAdmins, adicionarAdmin, removerAd
 import { removerDesabafo, apagarTodosDesabafos } from '../firebase/desabafos';
 import { removerComentario, buscarComentarios } from '../firebase/comentarios';
 import { ConfirmDialog } from './ConfirmDialog';
+import { Footer } from './Footer';
 import { formatarTempoRelativo } from '../utils/tempoRelativo';
 import { obterInfoSentimento } from '../config/sentimentos';
 import type { DesabafoAdmin, Comentario, PaginaModeracaoProps } from '../types';
@@ -562,6 +563,8 @@ export function PaginaModeracao({ isAdmin }: PaginaModeracaoProps) {
         onConfirmar={handleConfirmar}
         onCancelar={handleCancelar}
       />
+
+      <Footer />
     </div>
   );
 }
