@@ -1,8 +1,8 @@
 import { Timestamp } from 'firebase/firestore';
+import { Sentimento, TipoReacao } from '../config/sentimentos';
 
-// Tipos base
-export type Sentimento = 'triste' | 'raiva' | 'alivio';
-export type TipoReacao = 'apoio' | 'forca' | 'pouco';
+// Re-exportar tipos derivados do config (single source of truth)
+export type { Sentimento, TipoReacao };
 
 // Estado do usuário autenticado no React
 export interface UsuarioAuth {
@@ -15,11 +15,7 @@ export interface DesabafoDoc {
   sentimento: Sentimento;     // Categoria emocional
   criadoEm: Timestamp;       // Timestamp do Firestore (serverTimestamp)
   uid: string;                // Identificador do autor (Firebase Auth uid) - NÃO exposto no feed
-  reacoes: {
-    apoio: number;            // Contador "Eu me identifiquei"
-    forca: number;            // Contador "Força"
-    pouco: number;            // Contador "Eu acho é pouco"
-  };
+  reacoes: Record<TipoReacao, number>; // Contadores de reação derivados do config
   totalComentarios: number;   // Contador de comentários (desnormalizado para performance)
   numero?: number;            // Número incremental para URL amigável
 }
@@ -28,13 +24,9 @@ export interface DesabafoDoc {
 export interface Desabafo {
   id: string;                 // ID do documento Firestore
   texto: string;
-  sentimento: Sentimento;
+  sentimento: string;         // string para suportar valores legados na leitura
   criadoEm: Date;            // Convertido de Timestamp para Date
-  reacoes: {
-    apoio: number;
-    forca: number;
-    pouco: number;
-  };
+  reacoes: Record<TipoReacao, number>; // Contadores de reação derivados do config
   totalComentarios: number;
   numero?: number;            // Número incremental para navegação via LinkVerMais
 }

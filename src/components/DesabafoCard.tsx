@@ -1,4 +1,6 @@
-import { DesabafoCardProps, TipoReacao, Sentimento } from '../types';
+import { DesabafoCardProps, TipoReacao } from '../types';
+import { REACAO_CONFIG, obterInfoSentimento } from '../config/sentimentos';
+import { obterCorSentimento } from '../utils/obterCorSentimento';
 import { ComentarioSection } from './ComentarioSection';
 import { LinkVerMais } from './LinkVerMais';
 import './DesabafoCard.css';
@@ -28,19 +30,12 @@ function formatarTempoRelativo(data: Date): string {
   return `${dia}/${mes}/${ano}`;
 }
 
-function obterCorSentimento(sentimento: Sentimento): string {
-  const cores: Record<Sentimento, string> = {
-    triste: 'var(--cor-tristeza)',
-    raiva: 'var(--cor-raiva)',
-    alivio: 'var(--cor-alivio)',
-  };
-  return cores[sentimento];
-}
-
 export function DesabafoCard({ desabafo, onReagir, usuarioAutenticado, reacaoAtiva, uid, onVerDesabafo }: DesabafoCardProps) {
   const handleReagir = (tipo: TipoReacao) => {
     onReagir(tipo);
   };
+
+  const infoSentimento = obterInfoSentimento(desabafo.sentimento);
 
   const isClicavel = onVerDesabafo != null && desabafo.numero != null;
 
@@ -65,6 +60,9 @@ export function DesabafoCard({ desabafo, onReagir, usuarioAutenticado, reacaoAti
       >
         <p className="desabafo-card__texto">{desabafo.texto}</p>
         <div className="desabafo-card__meta">
+          <span className="desabafo-card__sentimento">
+            {infoSentimento.emoji} {infoSentimento.label}
+          </span>
           <span className="desabafo-card__tempo">
             {formatarTempoRelativo(desabafo.criadoEm)}
           </span>
@@ -75,38 +73,19 @@ export function DesabafoCard({ desabafo, onReagir, usuarioAutenticado, reacaoAti
       </div>
 
       <div className="desabafo-card__reacoes">
-        <button
-          className={`desabafo-card__reacao-btn ${reacaoAtiva === 'apoio' ? 'desabafo-card__reacao-btn--ativo' : ''}`}
-          onClick={() => handleReagir('apoio')}
-          aria-label="Eu me identifiquei"
-          aria-pressed={reacaoAtiva === 'apoio'}
-        >
-          <span className="desabafo-card__reacao-emoji">🤝</span>
-          <span className="desabafo-card__reacao-label">Eu me identifiquei</span>
-          <span className="desabafo-card__reacao-contador">{desabafo.reacoes.apoio}</span>
-        </button>
-
-        <button
-          className={`desabafo-card__reacao-btn ${reacaoAtiva === 'forca' ? 'desabafo-card__reacao-btn--ativo' : ''}`}
-          onClick={() => handleReagir('forca')}
-          aria-label="Força"
-          aria-pressed={reacaoAtiva === 'forca'}
-        >
-          <span className="desabafo-card__reacao-emoji">💪</span>
-          <span className="desabafo-card__reacao-label">Força</span>
-          <span className="desabafo-card__reacao-contador">{desabafo.reacoes.forca}</span>
-        </button>
-
-        <button
-          className={`desabafo-card__reacao-btn ${reacaoAtiva === 'pouco' ? 'desabafo-card__reacao-btn--ativo' : ''}`}
-          onClick={() => handleReagir('pouco')}
-          aria-label="Eu acho é pouco"
-          aria-pressed={reacaoAtiva === 'pouco'}
-        >
-          <span className="desabafo-card__reacao-emoji">🔥</span>
-          <span className="desabafo-card__reacao-label">Eu acho é pouco</span>
-          <span className="desabafo-card__reacao-contador">{desabafo.reacoes.pouco}</span>
-        </button>
+        {Object.entries(REACAO_CONFIG).map(([chave, entry]) => (
+          <button
+            key={chave}
+            className={`desabafo-card__reacao-btn ${reacaoAtiva === chave ? 'desabafo-card__reacao-btn--ativo' : ''}`}
+            onClick={() => handleReagir(chave as TipoReacao)}
+            aria-label={entry.label}
+            aria-pressed={reacaoAtiva === chave}
+          >
+            <span className="desabafo-card__reacao-emoji">{entry.emoji}</span>
+            <span className="desabafo-card__reacao-label">{entry.label}</span>
+            <span className="desabafo-card__reacao-contador">{desabafo.reacoes[chave as TipoReacao] ?? 0}</span>
+          </button>
+        ))}
       </div>
 
       <div className="desabafo-card__comentarios-section">

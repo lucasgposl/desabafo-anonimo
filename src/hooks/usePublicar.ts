@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { criarDesabafo } from '../firebase/desabafos';
 import { validarTextoDesabafo } from '../utils/validacao';
+import { criarReacoesIniciais } from '../config/sentimentos';
 import type { Sentimento, Desabafo } from '../types';
 
 interface UsePublicarReturn {
@@ -46,7 +47,7 @@ export function usePublicar(uid: string): UsePublicarReturn {
           texto,
           sentimento,
           criadoEm: new Date(),
-          reacoes: { apoio: 0, forca: 0, pouco: 0 },
+          reacoes: criarReacoesIniciais(),
           totalComentarios: 0,
         };
 

@@ -18,6 +18,7 @@ import {
   QueryConstraint,
 } from 'firebase/firestore';
 import { db } from './config';
+import { criarReacoesIniciais, normalizarReacoes } from '../config/sentimentos';
 import type { Sentimento, TipoReacao, Desabafo, DesabafoDoc, DesabafoAdmin } from '../types';
 
 const COLECAO = 'desabafos';
@@ -79,11 +80,7 @@ export async function criarDesabafo(
       sentimento,
       uid,
       criadoEm: serverTimestamp(),
-      reacoes: {
-        apoio: 0,
-        forca: 0,
-        pouco: 0,
-      },
+      reacoes: criarReacoesIniciais(),
       totalComentarios: 0,
       numero,
     });
@@ -125,7 +122,7 @@ export async function buscarDesabafos(
       texto: data.texto,
       sentimento: data.sentimento,
       criadoEm: data.criadoEm?.toDate() ?? new Date(),
-      reacoes: data.reacoes,
+      reacoes: normalizarReacoes(data.reacoes as Record<string, number>),
       totalComentarios: data.totalComentarios ?? 0,
       numero: data.numero,
       // uid é intencionalmente excluído para garantir anonimato
@@ -163,7 +160,7 @@ export async function buscarDesabafosTrends(): Promise<Desabafo[]> {
       texto: data.texto,
       sentimento: data.sentimento,
       criadoEm: data.criadoEm?.toDate() ?? new Date(),
-      reacoes: data.reacoes,
+      reacoes: normalizarReacoes(data.reacoes as Record<string, number>),
       totalComentarios: data.totalComentarios ?? 0,
       numero: data.numero,
       // uid é intencionalmente excluído para garantir anonimato
@@ -186,7 +183,7 @@ export async function buscarTodosDesabafosAdmin(): Promise<DesabafoAdmin[]> {
       texto: data.texto,
       sentimento: data.sentimento,
       criadoEm: data.criadoEm?.toDate() ?? new Date(),
-      reacoes: data.reacoes,
+      reacoes: normalizarReacoes(data.reacoes as Record<string, number>),
       totalComentarios: data.totalComentarios ?? 0,
       uid: data.uid,
     };

@@ -4,6 +4,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
+import { criarReacoesZeradas, sentimentoPadrao, todosSentimentos } from '../helpers/fixtureHelper';
 
 // Mocks
 const mockCriarDesabafo = jest.fn();
@@ -37,7 +38,7 @@ describe('usePublicar', () => {
 
       let retorno: unknown;
       await act(async () => {
-        retorno = await result.current.publicar('', 'triste');
+        retorno = await result.current.publicar('', sentimentoPadrao());
       });
 
       expect(retorno).toBeNull();
@@ -50,7 +51,7 @@ describe('usePublicar', () => {
 
       let retorno: unknown;
       await act(async () => {
-        retorno = await result.current.publicar('   \t\n  ', 'raiva');
+        retorno = await result.current.publicar('   \t\n  ', sentimentoPadrao());
       });
 
       expect(retorno).toBeNull();
@@ -64,7 +65,7 @@ describe('usePublicar', () => {
 
       let retorno: unknown;
       await act(async () => {
-        retorno = await result.current.publicar(textoLongo, 'alivio');
+        retorno = await result.current.publicar(textoLongo, sentimentoPadrao());
       });
 
       expect(retorno).toBeNull();
@@ -79,7 +80,7 @@ describe('usePublicar', () => {
 
       let retorno: unknown;
       await act(async () => {
-        retorno = await result.current.publicar(textoExato, 'triste');
+        retorno = await result.current.publicar(textoExato, sentimentoPadrao());
       });
 
       expect(retorno).not.toBeNull();
@@ -93,10 +94,10 @@ describe('usePublicar', () => {
       const { result } = renderHook(() => usePublicar(uid));
 
       await act(async () => {
-        await result.current.publicar('Meu desabafo', 'triste');
+        await result.current.publicar('Meu desabafo', sentimentoPadrao());
       });
 
-      expect(mockCriarDesabafo).toHaveBeenCalledWith('Meu desabafo', 'triste', uid);
+      expect(mockCriarDesabafo).toHaveBeenCalledWith('Meu desabafo', sentimentoPadrao(), uid);
     });
 
     it('deve retornar o desabafo criado com dados corretos', async () => {
@@ -105,15 +106,15 @@ describe('usePublicar', () => {
 
       let retorno: unknown;
       await act(async () => {
-        retorno = await result.current.publicar('Texto do desabafo', 'raiva');
+        retorno = await result.current.publicar('Texto do desabafo', sentimentoPadrao());
       });
 
       expect(retorno).toEqual({
         id: 'doc-id-xyz',
         texto: 'Texto do desabafo',
-        sentimento: 'raiva',
+        sentimento: sentimentoPadrao(),
         criadoEm: expect.any(Date),
-        reacoes: { apoio: 0, forca: 0, pouco: 0 },
+        reacoes: criarReacoesZeradas(),
         totalComentarios: 0,
       });
     });
@@ -128,7 +129,7 @@ describe('usePublicar', () => {
 
       let publicarPromise: Promise<unknown>;
       act(() => {
-        publicarPromise = result.current.publicar('Texto', 'alivio');
+        publicarPromise = result.current.publicar('Texto', sentimentoPadrao());
       });
 
       // Durante a publicação
@@ -149,7 +150,7 @@ describe('usePublicar', () => {
       const { result } = renderHook(() => usePublicar(uid));
 
       await act(async () => {
-        await result.current.publicar('Texto válido', 'triste');
+        await result.current.publicar('Texto válido', sentimentoPadrao());
       });
 
       expect(result.current.error).toBe('Erro ao publicar. Tente novamente.');
@@ -158,7 +159,7 @@ describe('usePublicar', () => {
       mockCriarDesabafo.mockResolvedValueOnce('doc-id-2');
 
       await act(async () => {
-        await result.current.publicar('Outro texto', 'raiva');
+        await result.current.publicar('Outro texto', sentimentoPadrao());
       });
 
       expect(result.current.error).toBeNull();
@@ -172,7 +173,7 @@ describe('usePublicar', () => {
 
       let retorno: unknown;
       await act(async () => {
-        retorno = await result.current.publicar('Meu texto', 'alivio');
+        retorno = await result.current.publicar('Meu texto', sentimentoPadrao());
       });
 
       expect(retorno).toBeNull();
@@ -186,7 +187,7 @@ describe('usePublicar', () => {
 
       let retorno: unknown;
       await act(async () => {
-        retorno = await result.current.publicar('Texto válido', 'triste');
+        retorno = await result.current.publicar('Texto válido', sentimentoPadrao());
       });
 
       expect(retorno).toBeNull();
@@ -194,7 +195,7 @@ describe('usePublicar', () => {
   });
 
   describe('Diferentes sentimentos', () => {
-    it.each(['triste', 'raiva', 'alivio'] as const)(
+    it.each(todosSentimentos())(
       'deve aceitar sentimento "%s"',
       async (sentimento) => {
         mockCriarDesabafo.mockResolvedValue(`doc-${sentimento}`);

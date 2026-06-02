@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { InputBoxProps, Sentimento } from '../types';
+import { SENTIMENTO_CONFIG, sentimentosPorCategoria, CATEGORIAS } from '../config/sentimentos';
 import { EMOJIS_EXPANDIDOS } from '../constants/emojis';
 import './InputBox.css';
 
@@ -24,21 +25,14 @@ export function inserirEmojiNoTexto(
   return { novoTexto, novaPosicao };
 }
 
-const SENTIMENTO_PADRAO: Sentimento = 'triste';
 const MAX_CARACTERES = 2000;
-
-const SENTIMENTOS: { valor: Sentimento; icone: string; label: string }[] = [
-  { valor: 'triste', icone: '😢', label: 'Tristeza' },
-  { valor: 'raiva', icone: '😤', label: 'Raiva' },
-  { valor: 'alivio', icone: '😌', label: 'Alívio' },
-];
 
 // Backwards compatibility: testes existentes importam EMOJIS daqui
 export const EMOJIS = EMOJIS_EXPANDIDOS;
 
 export function InputBox({ onPublicar, isPublicando }: InputBoxProps) {
   const [texto, setTexto] = useState('');
-  const [sentimento, setSentimento] = useState<Sentimento>(SENTIMENTO_PADRAO);
+  const [sentimento, setSentimento] = useState<Sentimento | null>(null);
   const [feedback, setFeedback] = useState<{ tipo: 'sucesso' | 'erro'; mensagem: string } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -86,10 +80,15 @@ export function InputBox({ onPublicar, isPublicando }: InputBoxProps) {
       return;
     }
 
+    if (!sentimento) {
+      mostrarFeedback('erro', 'Selecione um sentimento antes de publicar!');
+      return;
+    }
+
     try {
       await onPublicar(texto, sentimento);
       setTexto('');
-      setSentimento(SENTIMENTO_PADRAO);
+      setSentimento(null);
       mostrarFeedback('sucesso', 'Seu desabafo foi publicado. Você não está sozinho(a). 💜');
     } catch {
       mostrarFeedback('erro', 'Erro ao publicar. Tente novamente.');
@@ -127,20 +126,28 @@ export function InputBox({ onPublicar, isPublicando }: InputBoxProps) {
 
       <div className="input-box__controles">
         <div className="input-box__sentimentos" role="radiogroup" aria-label="Sentimento">
-          {SENTIMENTOS.map((s) => (
-            <button
-              key={s.valor}
-              type="button"
-              className={`input-box__sentimento-btn ${sentimento === s.valor ? 'input-box__sentimento-btn--ativo' : ''}`}
-              onClick={() => setSentimento(s.valor)}
-              disabled={isPublicando}
-              aria-pressed={sentimento === s.valor}
-              aria-label={s.label}
-              title={s.label}
-            >
-              <span className="input-box__sentimento-icone">{s.icone}</span>
-              <span className="input-box__sentimento-label">{s.label}</span>
-            </button>
+          {Object.entries(sentimentosPorCategoria()).map(([cat, chaves]) => (
+            <div key={cat} className="input-box__sentimento-grupo">
+              <span className="input-box__sentimento-categoria">{CATEGORIAS[cat as keyof typeof CATEGORIAS]}</span>
+              {chaves.map((chave) => {
+                const entry = SENTIMENTO_CONFIG[chave];
+                return (
+                  <button
+                    key={chave}
+                    type="button"
+                    className={`input-box__sentimento-btn ${sentimento === chave ? 'input-box__sentimento-btn--ativo' : ''}`}
+                    onClick={() => setSentimento(chave)}
+                    disabled={isPublicando}
+                    aria-pressed={sentimento === chave}
+                    aria-label={entry.label}
+                    title={entry.label}
+                  >
+                    <span className="input-box__sentimento-icone">{entry.emoji}</span>
+                    <span className="input-box__sentimento-label">{entry.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           ))}
         </div>
 

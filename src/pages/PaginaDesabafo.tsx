@@ -8,26 +8,10 @@ import { useAuth } from '../hooks/useAuth';
 import { useAdmin } from '../hooks/useAdmin';
 import { incrementarReacao } from '../firebase/desabafos';
 import { formatarTempoRelativo } from '../utils/tempoRelativo';
-import type { Desabafo, TipoReacao, Sentimento } from '../types';
+import { obterCorSentimento } from '../utils/obterCorSentimento';
+import { REACAO_CONFIG, obterInfoSentimento } from '../config/sentimentos';
+import type { Desabafo, TipoReacao } from '../types';
 import './PaginaDesabafo.css';
-
-function obterCorSentimento(sentimento: Sentimento): string {
-  const cores: Record<Sentimento, string> = {
-    triste: 'var(--cor-tristeza)',
-    raiva: 'var(--cor-raiva)',
-    alivio: 'var(--cor-alivio)',
-  };
-  return cores[sentimento];
-}
-
-function obterLabelSentimento(sentimento: Sentimento): string {
-  const labels: Record<Sentimento, string> = {
-    triste: 'Tristeza',
-    raiva: 'Raiva',
-    alivio: 'Alívio',
-  };
-  return labels[sentimento];
-}
 
 export function PaginaDesabafo() {
   const { numero } = useParams<{ numero: string }>();
@@ -135,7 +119,7 @@ export function PaginaDesabafo() {
               <span className="pagina-desabafo__numero">#{desabafoLocal.numero}</span>
             )}
             <span className="pagina-desabafo__sentimento-badge">
-              {obterLabelSentimento(desabafoLocal.sentimento)}
+              {obterInfoSentimento(desabafoLocal.sentimento).emoji} {obterInfoSentimento(desabafoLocal.sentimento).label}
             </span>
             <span className="pagina-desabafo__tempo">
               {formatarTempoRelativo(desabafoLocal.criadoEm, new Date())}
@@ -145,38 +129,19 @@ export function PaginaDesabafo() {
           <p className="pagina-desabafo__texto">{desabafoLocal.texto}</p>
 
           <div className="pagina-desabafo__reacoes">
-            <button
-              className={`pagina-desabafo__reacao-btn ${reacaoAtiva === 'apoio' ? 'pagina-desabafo__reacao-btn--ativo' : ''}`}
-              onClick={() => handleReagir('apoio')}
-              aria-label="Eu me identifiquei"
-              aria-pressed={reacaoAtiva === 'apoio'}
-            >
-              <span className="pagina-desabafo__reacao-emoji">🤝</span>
-              <span className="pagina-desabafo__reacao-label">Eu me identifiquei</span>
-              <span className="pagina-desabafo__reacao-contador">{desabafoLocal.reacoes.apoio}</span>
-            </button>
-
-            <button
-              className={`pagina-desabafo__reacao-btn ${reacaoAtiva === 'forca' ? 'pagina-desabafo__reacao-btn--ativo' : ''}`}
-              onClick={() => handleReagir('forca')}
-              aria-label="Força"
-              aria-pressed={reacaoAtiva === 'forca'}
-            >
-              <span className="pagina-desabafo__reacao-emoji">💪</span>
-              <span className="pagina-desabafo__reacao-label">Força</span>
-              <span className="pagina-desabafo__reacao-contador">{desabafoLocal.reacoes.forca}</span>
-            </button>
-
-            <button
-              className={`pagina-desabafo__reacao-btn ${reacaoAtiva === 'pouco' ? 'pagina-desabafo__reacao-btn--ativo' : ''}`}
-              onClick={() => handleReagir('pouco')}
-              aria-label="Eu acho é pouco"
-              aria-pressed={reacaoAtiva === 'pouco'}
-            >
-              <span className="pagina-desabafo__reacao-emoji">🔥</span>
-              <span className="pagina-desabafo__reacao-label">Eu acho é pouco</span>
-              <span className="pagina-desabafo__reacao-contador">{desabafoLocal.reacoes.pouco}</span>
-            </button>
+            {Object.entries(REACAO_CONFIG).map(([chave, entry]) => (
+              <button
+                key={chave}
+                className={`pagina-desabafo__reacao-btn ${reacaoAtiva === chave ? 'pagina-desabafo__reacao-btn--ativo' : ''}`}
+                onClick={() => handleReagir(chave as TipoReacao)}
+                aria-label={entry.label}
+                aria-pressed={reacaoAtiva === chave}
+              >
+                <span className="pagina-desabafo__reacao-emoji">{entry.emoji}</span>
+                <span className="pagina-desabafo__reacao-label">{entry.label}</span>
+                <span className="pagina-desabafo__reacao-contador">{desabafoLocal.reacoes[chave as TipoReacao] ?? 0}</span>
+              </button>
+            ))}
           </div>
         </article>
 

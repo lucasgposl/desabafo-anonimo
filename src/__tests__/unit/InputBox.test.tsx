@@ -1,9 +1,14 @@
 import { render, screen, fireEvent, waitFor, act, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { InputBox, EMOJIS } from '../../components/InputBox';
+import { SENTIMENTO_CONFIG, sentimentosPorCategoria, CATEGORIAS } from '../../config/sentimentos';
 
 describe('InputBox', () => {
   const mockOnPublicar = jest.fn().mockResolvedValue(undefined);
+
+  // Helper: pegar o primeiro sentimento da config
+  const primeiroSentimento = Object.keys(SENTIMENTO_CONFIG)[0];
+  const primeiroSentimentoEntry = SENTIMENTO_CONFIG[primeiroSentimento as keyof typeof SENTIMENTO_CONFIG];
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -23,25 +28,79 @@ describe('InputBox', () => {
       expect(textarea.getAttribute('placeholder')).not.toBe('');
     });
 
-    it('exibe select de sentimento com opções Tristeza, Raiva e Alívio', () => {
-      render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
-      const select = screen.getByLabelText('Sentimento');
-      expect(select).toBeInTheDocument();
-      expect(screen.getByText('Tristeza')).toBeInTheDocument();
-      expect(screen.getByText('Raiva')).toBeInTheDocument();
-      expect(screen.getByText('Alívio')).toBeInTheDocument();
-    });
-
-    it('sentimento padrão é Tristeza (triste)', () => {
+    it('exibe radiogroup de sentimentos com categorias Dramas e Good Vibes', () => {
       render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
       const sentimentoGroup = screen.getByRole('radiogroup', { name: 'Sentimento' });
-      const tristezaBtn = sentimentoGroup.querySelector('button[aria-label="Tristeza"]')!;
-      expect(tristezaBtn).toHaveAttribute('aria-pressed', 'true');
+      expect(sentimentoGroup).toBeInTheDocument();
+      expect(screen.getByText('Dramas')).toBeInTheDocument();
+      expect(screen.getByText('Good Vibes')).toBeInTheDocument();
+    });
+
+    it('nenhum sentimento está pré-selecionado', () => {
+      render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
+      const sentimentoGroup = screen.getByRole('radiogroup', { name: 'Sentimento' });
+      const buttons = sentimentoGroup.querySelectorAll('button[aria-pressed="true"]');
+      expect(buttons).toHaveLength(0);
     });
 
     it('exibe botão "Publicar"', () => {
       render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
       expect(screen.getByText('Publicar')).toBeInTheDocument();
+    });
+  });
+
+  describe('Sentimentos agrupados por categoria (Req 6.1, 6.2)', () => {
+    it('renderiza todos os 15 sentimentos do SENTIMENTO_CONFIG', () => {
+      render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
+      const sentimentoGroup = screen.getByRole('radiogroup', { name: 'Sentimento' });
+      const allKeys = Object.keys(SENTIMENTO_CONFIG);
+      allKeys.forEach((chave) => {
+        const entry = SENTIMENTO_CONFIG[chave as keyof typeof SENTIMENTO_CONFIG];
+        expect(within(sentimentoGroup).getByLabelText(entry.label)).toBeInTheDocument();
+      });
+    });
+
+    it('exibe emoji e label de cada sentimento conforme o config', () => {
+      render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
+      const sentimentoGroup = screen.getByRole('radiogroup', { name: 'Sentimento' });
+      const allKeys = Object.keys(SENTIMENTO_CONFIG);
+      allKeys.forEach((chave) => {
+        const entry = SENTIMENTO_CONFIG[chave as keyof typeof SENTIMENTO_CONFIG];
+        const btn = within(sentimentoGroup).getByLabelText(entry.label);
+        expect(btn).toHaveTextContent(entry.emoji);
+        expect(btn).toHaveTextContent(entry.label);
+      });
+    });
+
+    it('agrupa sentimentos em duas seções: Dramas (9) e Good Vibes (6)', () => {
+      render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
+      const grupos = sentimentosPorCategoria();
+      expect(grupos.dramas).toHaveLength(9);
+      expect(grupos.good_vibes).toHaveLength(6);
+      // Verify category labels are present
+      expect(screen.getByText(CATEGORIAS.dramas)).toBeInTheDocument();
+      expect(screen.getByText(CATEGORIAS.good_vibes)).toBeInTheDocument();
+    });
+
+    it('seleção exclusiva: apenas um sentimento ativo por vez', () => {
+      render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
+      const sentimentoGroup = screen.getByRole('radiogroup', { name: 'Sentimento' });
+      const keys = Object.keys(SENTIMENTO_CONFIG);
+
+      // Click first
+      const firstEntry = SENTIMENTO_CONFIG[keys[0] as keyof typeof SENTIMENTO_CONFIG];
+      fireEvent.click(within(sentimentoGroup).getByLabelText(firstEntry.label));
+      expect(within(sentimentoGroup).getByLabelText(firstEntry.label)).toHaveAttribute('aria-pressed', 'true');
+
+      // Click second — first should deselect
+      const secondEntry = SENTIMENTO_CONFIG[keys[1] as keyof typeof SENTIMENTO_CONFIG];
+      fireEvent.click(within(sentimentoGroup).getByLabelText(secondEntry.label));
+      expect(within(sentimentoGroup).getByLabelText(firstEntry.label)).toHaveAttribute('aria-pressed', 'false');
+      expect(within(sentimentoGroup).getByLabelText(secondEntry.label)).toHaveAttribute('aria-pressed', 'true');
+
+      // Only one active at a time
+      const activeButtons = sentimentoGroup.querySelectorAll('button[aria-pressed="true"]');
+      expect(activeButtons).toHaveLength(1);
     });
   });
 
@@ -71,6 +130,15 @@ describe('InputBox', () => {
       expect(screen.getByText('O texto deve ter no máximo 2000 caracteres.')).toBeInTheDocument();
       expect(mockOnPublicar).not.toHaveBeenCalled();
     });
+
+    it('exibe erro quando nenhum sentimento está selecionado', async () => {
+      render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
+      const textarea = screen.getByLabelText('Texto do desabafo');
+      fireEvent.change(textarea, { target: { value: 'Meu desabafo' } });
+      fireEvent.click(screen.getByText('Publicar'));
+      expect(screen.getByText('Selecione um sentimento antes de publicar!')).toBeInTheDocument();
+      expect(mockOnPublicar).not.toHaveBeenCalled();
+    });
   });
 
   describe('Publicação com sucesso', () => {
@@ -78,24 +146,32 @@ describe('InputBox', () => {
       render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
       const textarea = screen.getByLabelText('Texto do desabafo');
       fireEvent.change(textarea, { target: { value: 'Meu desabafo' } });
+
+      // Selecionar o primeiro sentimento
+      const sentimentoBtn = screen.getByLabelText(primeiroSentimentoEntry.label);
+      fireEvent.click(sentimentoBtn);
       fireEvent.click(screen.getByText('Publicar'));
 
       await waitFor(() => {
-        expect(mockOnPublicar).toHaveBeenCalledWith('Meu desabafo', 'triste');
+        expect(mockOnPublicar).toHaveBeenCalledWith('Meu desabafo', primeiroSentimento);
       });
     });
 
     it('chama onPublicar com sentimento selecionado', async () => {
       render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
       const textarea = screen.getByLabelText('Texto do desabafo');
-      fireEvent.change(textarea, { target: { value: 'Estou com raiva' } });
-      const sentimentoGroup = screen.getByRole('radiogroup', { name: 'Sentimento' });
-      const raivaSentimentoBtn = sentimentoGroup.querySelector('button[aria-label="Raiva"]')!;
-      fireEvent.click(raivaSentimentoBtn);
+      fireEvent.change(textarea, { target: { value: 'Estou sentindo algo' } });
+
+      // Selecionar o segundo sentimento da config
+      const sentimentos = Object.keys(SENTIMENTO_CONFIG);
+      const segundoSentimento = sentimentos[1];
+      const segundoEntry = SENTIMENTO_CONFIG[segundoSentimento as keyof typeof SENTIMENTO_CONFIG];
+      const sentimentoBtn = screen.getByLabelText(segundoEntry.label);
+      fireEvent.click(sentimentoBtn);
       fireEvent.click(screen.getByText('Publicar'));
 
       await waitFor(() => {
-        expect(mockOnPublicar).toHaveBeenCalledWith('Estou com raiva', 'raiva');
+        expect(mockOnPublicar).toHaveBeenCalledWith('Estou sentindo algo', segundoSentimento);
       });
     });
 
@@ -103,6 +179,10 @@ describe('InputBox', () => {
       render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
       const textarea = screen.getByLabelText('Texto do desabafo') as HTMLTextAreaElement;
       fireEvent.change(textarea, { target: { value: 'Meu desabafo' } });
+
+      // Selecionar um sentimento para poder publicar
+      const sentimentoBtn = screen.getByLabelText(primeiroSentimentoEntry.label);
+      fireEvent.click(sentimentoBtn);
       fireEvent.click(screen.getByText('Publicar'));
 
       await waitFor(() => {
@@ -110,18 +190,19 @@ describe('InputBox', () => {
       });
     });
 
-    it('restaura sentimento padrão após sucesso', async () => {
+    it('reseta sentimento para null após sucesso', async () => {
       render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
       const textarea = screen.getByLabelText('Texto do desabafo');
       fireEvent.change(textarea, { target: { value: 'Texto' } });
-      const sentimentoGroup = screen.getByRole('radiogroup', { name: 'Sentimento' });
-      const raivaSentimentoBtn = sentimentoGroup.querySelector('button[aria-label="Raiva"]')!;
-      fireEvent.click(raivaSentimentoBtn);
+
+      const sentimentoBtn = screen.getByLabelText(primeiroSentimentoEntry.label);
+      fireEvent.click(sentimentoBtn);
       fireEvent.click(screen.getByText('Publicar'));
 
       await waitFor(() => {
-        const tristezaBtn = sentimentoGroup.querySelector('button[aria-label="Tristeza"]')!;
-        expect(tristezaBtn).toHaveAttribute('aria-pressed', 'true');
+        const sentimentoGroup = screen.getByRole('radiogroup', { name: 'Sentimento' });
+        const activeButtons = sentimentoGroup.querySelectorAll('button[aria-pressed="true"]');
+        expect(activeButtons).toHaveLength(0);
       });
     });
 
@@ -129,6 +210,10 @@ describe('InputBox', () => {
       render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
       const textarea = screen.getByLabelText('Texto do desabafo');
       fireEvent.change(textarea, { target: { value: 'Meu desabafo' } });
+
+      // Selecionar sentimento para poder publicar
+      const sentimentoBtn = screen.getByLabelText(primeiroSentimentoEntry.label);
+      fireEvent.click(sentimentoBtn);
       fireEvent.click(screen.getByText('Publicar'));
 
       await waitFor(() => {
@@ -149,6 +234,10 @@ describe('InputBox', () => {
       render(<InputBox onPublicar={mockOnPublicarErro} isPublicando={false} />);
       const textarea = screen.getByLabelText('Texto do desabafo');
       fireEvent.change(textarea, { target: { value: 'Meu desabafo' } });
+
+      // Selecionar sentimento para passar a validação
+      const sentimentoBtn = screen.getByLabelText(primeiroSentimentoEntry.label);
+      fireEvent.click(sentimentoBtn);
       fireEvent.click(screen.getByText('Publicar'));
 
       await waitFor(() => {
@@ -162,6 +251,10 @@ describe('InputBox', () => {
       render(<InputBox onPublicar={mockOnPublicarErro} isPublicando={false} />);
       const textarea = screen.getByLabelText('Texto do desabafo') as HTMLTextAreaElement;
       fireEvent.change(textarea, { target: { value: 'Meu desabafo' } });
+
+      // Selecionar sentimento para passar a validação
+      const sentimentoBtn = screen.getByLabelText(primeiroSentimentoEntry.label);
+      fireEvent.click(sentimentoBtn);
       fireEvent.click(screen.getByText('Publicar'));
 
       await waitFor(() => {

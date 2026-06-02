@@ -16,10 +16,10 @@
   --cor-sucesso: #2d6a4f;
   --cor-erro: #9b2335;
 
-  /* --- Cores por Sentimento --- */
-  --cor-tristeza: #4a90d9;
-  --cor-raiva: #d94a4a;
-  --cor-alivio: #4ad9a0;
+  /* --- Cores por Categoria de Sentimento --- */
+  --cor-dramas: #d94a4a;
+  --cor-good-vibes: #4ad9a0;
+  --cor-neutro: #a0a0a0;
 
   /* --- Tipografia --- */
   --fonte-familia: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

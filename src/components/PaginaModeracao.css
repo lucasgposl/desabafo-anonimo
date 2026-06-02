@@ -130,16 +130,16 @@
   color: var(--cor-texto);
 }
 
-.pagina-moderacao__sentimento--triste {
-  background-color: var(--cor-tristeza);
+.pagina-moderacao__sentimento--dramas {
+  background-color: var(--cor-dramas);
 }
 
-.pagina-moderacao__sentimento--raiva {
-  background-color: var(--cor-raiva);
+.pagina-moderacao__sentimento--good_vibes {
+  background-color: var(--cor-good-vibes);
 }
 
-.pagina-moderacao__sentimento--alivio {
-  background-color: var(--cor-alivio);
+.pagina-moderacao__sentimento--legado {
+  background-color: var(--cor-neutro);
 }
 
 .pagina-moderacao__data {

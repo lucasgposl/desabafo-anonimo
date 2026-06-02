@@ -4,6 +4,7 @@ import { removerDesabafo, apagarTodosDesabafos } from '../firebase/desabafos';
 import { removerComentario, buscarComentarios } from '../firebase/comentarios';
 import { ConfirmDialog } from './ConfirmDialog';
 import { formatarTempoRelativo } from '../utils/tempoRelativo';
+import { obterInfoSentimento } from '../config/sentimentos';
 import type { DesabafoAdmin, Comentario, PaginaModeracaoProps } from '../types';
 import type { DocumentSnapshot } from 'firebase/firestore';
 import './PaginaModeracao.css';
@@ -182,12 +183,8 @@ export function PaginaModeracao({ isAdmin }: PaginaModeracaoProps) {
   };
 
   const traduzirSentimento = (sentimento: string): string => {
-    const mapa: Record<string, string> = {
-      triste: 'Tristeza',
-      raiva: 'Raiva',
-      alivio: 'Alívio',
-    };
-    return mapa[sentimento] || sentimento;
+    const info = obterInfoSentimento(sentimento);
+    return `${info.emoji} ${info.label}`;
   };
 
   const handleConfirmar = async () => {
@@ -387,7 +384,7 @@ export function PaginaModeracao({ isAdmin }: PaginaModeracaoProps) {
                     {truncarTexto(desabafo.texto)}
                   </p>
                   <div className="pagina-moderacao__item-meta">
-                    <span className={`pagina-moderacao__sentimento pagina-moderacao__sentimento--${desabafo.sentimento}`}>
+                    <span className={`pagina-moderacao__sentimento pagina-moderacao__sentimento--${obterInfoSentimento(desabafo.sentimento).categoria ?? 'legado'}`}>
                       {traduzirSentimento(desabafo.sentimento)}
                     </span>
                     <span className="pagina-moderacao__data">

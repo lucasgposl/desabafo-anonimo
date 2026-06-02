@@ -5,8 +5,13 @@ const config: Config = {
   testEnvironment: 'jsdom',
   roots: ['<rootDir>/src'],
   testMatch: [
-    '**/__tests__/**/*.{ts,tsx}',
+    '**/__tests__/**/*.{test,spec}.{ts,tsx}',
+    '**/__tests__/**/!(helpers)/**/*.{ts,tsx}',
     '**/*.{test,spec}.{ts,tsx}',
+  ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/__tests__/helpers/',
   ],
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {

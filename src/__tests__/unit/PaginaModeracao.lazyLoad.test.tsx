@@ -37,14 +37,15 @@ jest.mock('../../firebase/comentarios', () => ({
 
 import { PaginaModeracao } from '../../components/PaginaModeracao';
 import type { DesabafoAdmin, Comentario } from '../../types';
+import { criarReacoesMock, sentimentoPadrao } from '../helpers/fixtureHelper';
 
 const criarDesabafoMock = (overrides: Partial<DesabafoAdmin> = {}): DesabafoAdmin => ({
   id: 'desabafo-1',
   texto: 'Texto do desabafo de teste',
-  sentimento: 'triste',
+  sentimento: sentimentoPadrao(),
   criadoEm: new Date('2024-06-01'),
   uid: 'uid-autor',
-  reacoes: { apoio: 0, forca: 0, pouco: 0 },
+  reacoes: criarReacoesMock(),
   totalComentarios: 3,
   ...overrides,
 });

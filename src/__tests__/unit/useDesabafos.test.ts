@@ -5,6 +5,7 @@
 
 import { renderHook, act, waitFor } from '@testing-library/react';
 import type { Desabafo, Sentimento } from '../../types';
+import { sentimentoPadrao, criarReacoesZeradas } from '../helpers/fixtureHelper';
 
 // Mocks
 const mockBuscarDesabafos = jest.fn();
@@ -21,9 +22,9 @@ function criarDesabafoMock(overrides: Partial<Desabafo> = {}): Desabafo {
   return {
     id: `desabafo-${Math.random().toString(36).slice(2)}`,
     texto: 'Texto de teste',
-    sentimento: 'triste',
+    sentimento: sentimentoPadrao(),
     criadoEm: new Date(),
-    reacoes: { apoio: 0, forca: 0, pouco: 0 },
+    reacoes: criarReacoesZeradas(),
     totalComentarios: 0,
     ...overrides,
   };
@@ -216,7 +217,7 @@ describe('useDesabafos', () => {
         ultimoDoc: null,
       });
 
-      rerender({ filtro: 'triste' });
+      rerender({ filtro: sentimentoPadrao() });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -224,7 +225,7 @@ describe('useDesabafos', () => {
 
       expect(result.current.desabafos).toHaveLength(3);
       expect(result.current.total).toBe(3);
-      expect(mockBuscarDesabafos).toHaveBeenLastCalledWith('triste', 20, undefined);
+      expect(mockBuscarDesabafos).toHaveBeenLastCalledWith(sentimentoPadrao(), 20, undefined);
     });
 
     it('deve passar filtro correto para buscarDesabafos', async () => {
@@ -233,10 +234,10 @@ describe('useDesabafos', () => {
         ultimoDoc: null,
       });
 
-      renderHook(() => useDesabafos('raiva'));
+      renderHook(() => useDesabafos(sentimentoPadrao()));
 
       await waitFor(() => {
-        expect(mockBuscarDesabafos).toHaveBeenCalledWith('raiva', 20, undefined);
+        expect(mockBuscarDesabafos).toHaveBeenCalledWith(sentimentoPadrao(), 20, undefined);
       });
     });
   });

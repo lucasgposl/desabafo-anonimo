@@ -18,18 +18,21 @@ service cloud.firestore {
       allow read: if true;
 
       // Criação: apenas usuários autenticados, com uid do próprio autor
+      // Sentimento validado como string genérica 1-100 chars (sem lista hardcoded)
+      // Reações validadas como map presente (sem chaves específicas)
       allow create: if isAuthenticated()
         && request.resource.data.texto is string
         && request.resource.data.texto.size() >= 1
         && request.resource.data.texto.size() <= 2000
-        && request.resource.data.sentimento in ['triste', 'raiva', 'alivio']
+        && request.resource.data.sentimento is string
+        && request.resource.data.sentimento.size() >= 1
+        && request.resource.data.sentimento.size() <= 100
         && request.resource.data.uid == request.auth.uid
-        && request.resource.data.reacoes.apoio == 0
-        && request.resource.data.reacoes.forca == 0
-        && request.resource.data.reacoes.pouco == 0
+        && request.resource.data.reacoes is map
+        && request.resource.data.reacoes.size() > 0
         && request.resource.data.totalComentarios == 0;
 
-      // Atualização: apenas contadores de reação e totalComentarios podem mudar
+      // Atualização: campos imutáveis protegidos; apenas reacoes e totalComentarios podem mudar
       allow update: if request.resource.data.texto == resource.data.texto
         && request.resource.data.sentimento == resource.data.sentimento
         && request.resource.data.criadoEm == resource.data.criadoEm

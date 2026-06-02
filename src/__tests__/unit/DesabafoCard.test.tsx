@@ -2,7 +2,9 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
 import { DesabafoCard } from '../../components/DesabafoCard';
-import { Desabafo } from '../../types';
+import { Desabafo, TipoReacao } from '../../types';
+import { REACAO_CONFIG, SENTIMENTO_CONFIG } from '../../config/sentimentos';
+import { criarReacoesMock, sentimentoPadrao } from '../helpers/fixtureHelper';
 
 // Mock firebase/comentarios to prevent real Firebase calls when ComentarioSection renders
 jest.mock('../../firebase/comentarios', () => ({
@@ -10,13 +12,22 @@ jest.mock('../../firebase/comentarios', () => ({
   criarComentario: jest.fn().mockResolvedValue('mock-id'),
 }));
 
+const reacaoKeys = Object.keys(REACAO_CONFIG) as TipoReacao[];
+const REACAO_KEY_0 = reacaoKeys[0];
+const REACAO_KEY_1 = reacaoKeys[1];
+const REACAO_KEY_2 = reacaoKeys[2];
+const REACAO_LABEL_0 = REACAO_CONFIG[REACAO_KEY_0].label;
+const REACAO_LABEL_1 = REACAO_CONFIG[REACAO_KEY_1].label;
+const REACAO_LABEL_2 = REACAO_CONFIG[REACAO_KEY_2].label;
+const TOTAL_REACOES = reacaoKeys.length;
+
 function criarDesabafoMock(overrides: Partial<Desabafo> = {}): Desabafo {
   return {
     id: 'abc123',
     texto: 'Este é um desabafo de teste.',
-    sentimento: 'triste',
+    sentimento: sentimentoPadrao(),
     criadoEm: new Date('2024-01-15T10:00:00Z'),
-    reacoes: { apoio: 5, forca: 3, pouco: 1 },
+    reacoes: criarReacoesMock({ [REACAO_KEY_0]: 5, [REACAO_KEY_1]: 3, [REACAO_KEY_2]: 1 }),
     totalComentarios: 0,
     ...overrides,
   };
@@ -50,71 +61,156 @@ describe('DesabafoCard', () => {
     expect(screen.getByText('agora')).toBeInTheDocument();
   });
 
-  it('aplica borda lateral azul para sentimento triste', () => {
+  it('aplica borda lateral com cor de categoria "dramas"', () => {
+    // Use a sentimento da categoria "dramas"
+    const dramaKey = Object.keys(SENTIMENTO_CONFIG).find(
+      (k) => SENTIMENTO_CONFIG[k as keyof typeof SENTIMENTO_CONFIG].categoria === 'dramas'
+    )!;
+    const desabafo = criarDesabafoMock({ sentimento: dramaKey });
+    const { container } = renderComRouter(
+      <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} />
+    );
+    const card = container.querySelector('.desabafo-card');
+    expect(card).toHaveStyle({ borderLeftColor: 'var(--cor-dramas)' });
+  });
+
+  it('aplica borda lateral com cor de categoria "good_vibes"', () => {
+    const goodVibesKey = Object.keys(SENTIMENTO_CONFIG).find(
+      (k) => SENTIMENTO_CONFIG[k as keyof typeof SENTIMENTO_CONFIG].categoria === 'good_vibes'
+    )!;
+    const desabafo = criarDesabafoMock({ sentimento: goodVibesKey });
+    const { container } = renderComRouter(
+      <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} />
+    );
+    const card = container.querySelector('.desabafo-card');
+    expect(card).toHaveStyle({ borderLeftColor: 'var(--cor-good-vibes)' });
+  });
+
+  it('aplica cor neutra para sentimento legado desconhecido', () => {
     const desabafo = criarDesabafoMock({ sentimento: 'triste' });
     const { container } = renderComRouter(
       <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} />
     );
     const card = container.querySelector('.desabafo-card');
-    expect(card).toHaveStyle({ borderLeftColor: 'var(--cor-tristeza)' });
+    expect(card).toHaveStyle({ borderLeftColor: 'var(--cor-neutro)' });
   });
 
-  it('aplica borda lateral vermelha para sentimento raiva', () => {
-    const desabafo = criarDesabafoMock({ sentimento: 'raiva' });
+  it('exibe emoji e label do sentimento via obterInfoSentimento para sentimento válido', () => {
+    const chave = sentimentoPadrao();
+    const info = SENTIMENTO_CONFIG[chave];
+    const desabafo = criarDesabafoMock({ sentimento: chave });
     const { container } = renderComRouter(
       <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} />
     );
-    const card = container.querySelector('.desabafo-card');
-    expect(card).toHaveStyle({ borderLeftColor: 'var(--cor-raiva)' });
+    const sentimentoEl = container.querySelector('.desabafo-card__sentimento');
+    expect(sentimentoEl).toHaveTextContent(info.emoji);
+    expect(sentimentoEl).toHaveTextContent(info.label);
   });
 
-  it('aplica borda lateral verde para sentimento alivio', () => {
-    const desabafo = criarDesabafoMock({ sentimento: 'alivio' });
+  it('exibe fallback para sentimento legado desconhecido', () => {
+    const desabafo = criarDesabafoMock({ sentimento: 'triste' });
     const { container } = renderComRouter(
       <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} />
     );
-    const card = container.querySelector('.desabafo-card');
-    expect(card).toHaveStyle({ borderLeftColor: 'var(--cor-alivio)' });
+    const sentimentoEl = container.querySelector('.desabafo-card__sentimento');
+    expect(sentimentoEl).toHaveTextContent('❓');
+    expect(sentimentoEl).toHaveTextContent('Sentimento antigo');
   });
 
-  it('renderiza três botões de reação com contadores', () => {
+  it('renderiza todos os 8 botões de reação da config com contadores', () => {
     const desabafo = criarDesabafoMock();
     renderComRouter(
       <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} />
     );
-    expect(screen.getByText('Eu me identifiquei')).toBeInTheDocument();
-    expect(screen.getByText('Força')).toBeInTheDocument();
-    expect(screen.getByText('Eu acho é pouco')).toBeInTheDocument();
+    // All 8 reaction labels should be present
+    for (const [, entry] of Object.entries(REACAO_CONFIG)) {
+      expect(screen.getByText(entry.label)).toBeInTheDocument();
+    }
+    // Counters for the specific values set in mock
     expect(screen.getByText('5')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument();
     expect(screen.getByText('1')).toBeInTheDocument();
   });
 
-  it('chama onReagir com "apoio" ao clicar em "Eu me identifiquei"', () => {
+  it('renderiza exatamente 8 botões de reação (total de chaves no REACAO_CONFIG)', () => {
     const desabafo = criarDesabafoMock();
     renderComRouter(
       <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} />
     );
-    fireEvent.click(screen.getByLabelText('Eu me identifiquei'));
-    expect(mockOnReagir).toHaveBeenCalledWith('apoio');
+    const botoes = screen.getAllByRole('button', { pressed: undefined });
+    // Filter buttons that have aria-label matching a reaction label
+    const reacaoBotoes = botoes.filter((btn) =>
+      reacaoKeys.some((key) => btn.getAttribute('aria-label') === REACAO_CONFIG[key].label)
+    );
+    expect(reacaoBotoes).toHaveLength(TOTAL_REACOES);
   });
 
-  it('chama onReagir com "forca" ao clicar em "Força"', () => {
+  it('renderiza botões de reação na mesma ordem definida no REACAO_CONFIG', () => {
     const desabafo = criarDesabafoMock();
-    renderComRouter(
+    const { container } = renderComRouter(
       <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} />
     );
-    fireEvent.click(screen.getByLabelText('Força'));
-    expect(mockOnReagir).toHaveBeenCalledWith('forca');
+    const botoes = container.querySelectorAll('.desabafo-card__reacao-btn');
+    const labelsRenderizados = Array.from(botoes).map(
+      (btn) => btn.querySelector('.desabafo-card__reacao-label')?.textContent
+    );
+    const labelsEsperados = Object.values(REACAO_CONFIG).map((entry) => entry.label);
+    expect(labelsRenderizados).toEqual(labelsEsperados);
   });
 
-  it('chama onReagir com "pouco" ao clicar em "Eu acho é pouco"', () => {
+  it('renderiza emoji correto para cada reação conforme REACAO_CONFIG', () => {
+    const desabafo = criarDesabafoMock();
+    const { container } = renderComRouter(
+      <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} />
+    );
+    const botoes = container.querySelectorAll('.desabafo-card__reacao-btn');
+    const emojisRenderizados = Array.from(botoes).map(
+      (btn) => btn.querySelector('.desabafo-card__reacao-emoji')?.textContent
+    );
+    const emojisEsperados = Object.values(REACAO_CONFIG).map((entry) => entry.emoji);
+    expect(emojisRenderizados).toEqual(emojisEsperados);
+  });
+
+  it('marca reação ativa com aria-pressed="true" e classe ativa', () => {
+    const desabafo = criarDesabafoMock();
+    renderComRouter(
+      <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} reacaoAtiva={REACAO_KEY_0} />
+    );
+    const btnAtivo = screen.getByLabelText(REACAO_LABEL_0);
+    expect(btnAtivo).toHaveAttribute('aria-pressed', 'true');
+    expect(btnAtivo).toHaveClass('desabafo-card__reacao-btn--ativo');
+
+    // Demais botões devem estar com aria-pressed="false"
+    const btnInativo = screen.getByLabelText(REACAO_LABEL_1);
+    expect(btnInativo).toHaveAttribute('aria-pressed', 'false');
+    expect(btnInativo).not.toHaveClass('desabafo-card__reacao-btn--ativo');
+  });
+
+  it(`chama onReagir com "${REACAO_KEY_0}" ao clicar no primeiro botão de reação`, () => {
     const desabafo = criarDesabafoMock();
     renderComRouter(
       <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} />
     );
-    fireEvent.click(screen.getByLabelText('Eu acho é pouco'));
-    expect(mockOnReagir).toHaveBeenCalledWith('pouco');
+    fireEvent.click(screen.getByLabelText(REACAO_LABEL_0));
+    expect(mockOnReagir).toHaveBeenCalledWith(REACAO_KEY_0);
+  });
+
+  it(`chama onReagir com "${REACAO_KEY_1}" ao clicar no segundo botão de reação`, () => {
+    const desabafo = criarDesabafoMock();
+    renderComRouter(
+      <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} />
+    );
+    fireEvent.click(screen.getByLabelText(REACAO_LABEL_1));
+    expect(mockOnReagir).toHaveBeenCalledWith(REACAO_KEY_1);
+  });
+
+  it(`chama onReagir com "${REACAO_KEY_2}" ao clicar no terceiro botão de reação`, () => {
+    const desabafo = criarDesabafoMock();
+    renderComRouter(
+      <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} />
+    );
+    fireEvent.click(screen.getByLabelText(REACAO_LABEL_2));
+    expect(mockOnReagir).toHaveBeenCalledWith(REACAO_KEY_2);
   });
 
   it('renderiza seção de comentários diretamente quando totalComentarios > 0', () => {
@@ -159,12 +255,12 @@ describe('DesabafoCard', () => {
   });
 
   it('exibe contadores de reação zerados para desabafo sem reações', () => {
-    const desabafo = criarDesabafoMock({ reacoes: { apoio: 0, forca: 0, pouco: 0 } });
+    const desabafo = criarDesabafoMock({ reacoes: criarReacoesMock() });
     renderComRouter(
       <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} />
     );
     const contadores = screen.getAllByText('0');
-    expect(contadores).toHaveLength(3);
+    expect(contadores).toHaveLength(TOTAL_REACOES);
   });
 
   it('não renderiza botão de toggle de comentários', () => {

@@ -1,17 +1,29 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { Feed } from '../../components/Feed';
 import { Desabafo } from '../../types';
+import { criarReacoesMock, sentimentoPadrao } from '../helpers/fixtureHelper';
+
+// Mock firebase/comentarios to prevent real Firebase initialization
+jest.mock('../../firebase/comentarios', () => ({
+  buscarComentarios: jest.fn().mockResolvedValue([]),
+  criarComentario: jest.fn().mockResolvedValue('mock-id'),
+}));
 
 function criarDesabafoMock(overrides: Partial<Desabafo> & { id: string }): Desabafo {
   return {
     texto: 'Texto de teste',
-    sentimento: 'triste',
+    sentimento: sentimentoPadrao(),
     criadoEm: new Date('2024-01-15T10:00:00Z'),
-    reacoes: { apoio: 0, forca: 0, pouco: 0 },
+    reacoes: criarReacoesMock(),
     totalComentarios: 0,
     ...overrides,
   };
+}
+
+function renderComRouter(ui: React.ReactElement) {
+  return render(<MemoryRouter>{ui}</MemoryRouter>);
 }
 
 describe('Feed', () => {
@@ -24,7 +36,7 @@ describe('Feed', () => {
   });
 
   it('exibe LoadingIndicator quando isLoading é true e não há desabafos', () => {
-    render(
+    renderComRouter(
       <Feed
         desabafos={[]}
         isLoading={true}
@@ -39,7 +51,7 @@ describe('Feed', () => {
   });
 
   it('exibe EmptyState quando não há desabafos e não está carregando', () => {
-    render(
+    renderComRouter(
       <Feed
         desabafos={[]}
         isLoading={false}
@@ -60,7 +72,7 @@ describe('Feed', () => {
       criarDesabafoMock({ id: '3', texto: 'Terceiro desabafo' }),
     ];
 
-    render(
+    renderComRouter(
       <Feed
         desabafos={desabafos}
         isLoading={false}
@@ -79,7 +91,7 @@ describe('Feed', () => {
   it('exibe botão "Carregar mais" quando hasMore é true', () => {
     const desabafos = [criarDesabafoMock({ id: '1' })];
 
-    render(
+    renderComRouter(
       <Feed
         desabafos={desabafos}
         isLoading={false}
@@ -96,7 +108,7 @@ describe('Feed', () => {
   it('não exibe botão "Carregar mais" quando hasMore é false', () => {
     const desabafos = [criarDesabafoMock({ id: '1' })];
 
-    render(
+    renderComRouter(
       <Feed
         desabafos={desabafos}
         isLoading={false}
@@ -113,7 +125,7 @@ describe('Feed', () => {
   it('chama onLoadMore ao clicar no botão "Carregar mais"', () => {
     const desabafos = [criarDesabafoMock({ id: '1' })];
 
-    render(
+    renderComRouter(
       <Feed
         desabafos={desabafos}
         isLoading={false}
@@ -131,7 +143,7 @@ describe('Feed', () => {
   it('não exibe botão "Carregar mais" durante carregamento', () => {
     const desabafos = [criarDesabafoMock({ id: '1' })];
 
-    render(
+    renderComRouter(
       <Feed
         desabafos={desabafos}
         isLoading={true}
@@ -148,7 +160,7 @@ describe('Feed', () => {
   it('exibe loading inline quando está carregando mais e já tem desabafos', () => {
     const desabafos = [criarDesabafoMock({ id: '1' })];
 
-    render(
+    renderComRouter(
       <Feed
         desabafos={desabafos}
         isLoading={true}
@@ -165,7 +177,7 @@ describe('Feed', () => {
   it('não exibe informações identificáveis do autor nos cards', () => {
     const desabafos = [criarDesabafoMock({ id: '1', texto: 'Desabafo anônimo' })];
 
-    const { container } = render(
+    const { container } = renderComRouter(
       <Feed
         desabafos={desabafos}
         isLoading={false}

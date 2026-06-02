@@ -1,13 +1,14 @@
 import { calcularTotalInteracoes, ordenarPorPopularidade, paginar } from '../../utils/trends';
 import { Desabafo } from '../../types';
+import { sentimentoPadrao, criarReacoesZeradas, criarReacoesMock } from '../helpers/fixtureHelper';
 
 function criarDesabafo(overrides: Partial<Desabafo> = {}): Desabafo {
   return {
     id: '1',
     texto: 'Teste',
-    sentimento: 'triste',
+    sentimento: sentimentoPadrao(),
     criadoEm: new Date('2024-01-15'),
-    reacoes: { apoio: 0, forca: 0, pouco: 0 },
+    reacoes: criarReacoesZeradas(),
     totalComentarios: 0,
     ...overrides,
   };
@@ -16,7 +17,7 @@ function criarDesabafo(overrides: Partial<Desabafo> = {}): Desabafo {
 describe('calcularTotalInteracoes', () => {
   it('deve somar todos os campos corretamente', () => {
     const desabafo = criarDesabafo({
-      reacoes: { apoio: 5, forca: 3, pouco: 2 },
+      reacoes: criarReacoesMock({ apoio: 5, forca: 3, pouco: 2 }),
       totalComentarios: 4,
     });
     expect(calcularTotalInteracoes(desabafo)).toBe(14);
@@ -39,9 +40,9 @@ describe('calcularTotalInteracoes', () => {
 describe('ordenarPorPopularidade', () => {
   it('deve ordenar por total de interações decrescente', () => {
     const desabafos = [
-      criarDesabafo({ id: 'a', reacoes: { apoio: 1, forca: 0, pouco: 0 }, totalComentarios: 0 }),
-      criarDesabafo({ id: 'b', reacoes: { apoio: 5, forca: 3, pouco: 2 }, totalComentarios: 4 }),
-      criarDesabafo({ id: 'c', reacoes: { apoio: 2, forca: 1, pouco: 0 }, totalComentarios: 1 }),
+      criarDesabafo({ id: 'a', reacoes: criarReacoesMock({ apoio: 1, forca: 0, pouco: 0 }), totalComentarios: 0 }),
+      criarDesabafo({ id: 'b', reacoes: criarReacoesMock({ apoio: 5, forca: 3, pouco: 2 }), totalComentarios: 4 }),
+      criarDesabafo({ id: 'c', reacoes: criarReacoesMock({ apoio: 2, forca: 1, pouco: 0 }), totalComentarios: 1 }),
     ];
 
     const resultado = ordenarPorPopularidade(desabafos);
@@ -50,8 +51,8 @@ describe('ordenarPorPopularidade', () => {
 
   it('deve usar criadoEm como tiebreaker (mais recente primeiro)', () => {
     const desabafos = [
-      criarDesabafo({ id: 'antigo', criadoEm: new Date('2024-01-01'), reacoes: { apoio: 5, forca: 0, pouco: 0 }, totalComentarios: 0 }),
-      criarDesabafo({ id: 'recente', criadoEm: new Date('2024-01-15'), reacoes: { apoio: 5, forca: 0, pouco: 0 }, totalComentarios: 0 }),
+      criarDesabafo({ id: 'antigo', criadoEm: new Date('2024-01-01'), reacoes: criarReacoesMock({ apoio: 5, forca: 0, pouco: 0 }), totalComentarios: 0 }),
+      criarDesabafo({ id: 'recente', criadoEm: new Date('2024-01-15'), reacoes: criarReacoesMock({ apoio: 5, forca: 0, pouco: 0 }), totalComentarios: 0 }),
     ];
 
     const resultado = ordenarPorPopularidade(desabafos);
@@ -60,8 +61,8 @@ describe('ordenarPorPopularidade', () => {
 
   it('não deve mutar o array original', () => {
     const desabafos = [
-      criarDesabafo({ id: 'a', reacoes: { apoio: 10, forca: 0, pouco: 0 } }),
-      criarDesabafo({ id: 'b', reacoes: { apoio: 1, forca: 0, pouco: 0 } }),
+      criarDesabafo({ id: 'a', reacoes: criarReacoesMock({ apoio: 10, forca: 0, pouco: 0 }) }),
+      criarDesabafo({ id: 'b', reacoes: criarReacoesMock({ apoio: 1, forca: 0, pouco: 0 }) }),
     ];
 
     const original = [...desabafos];

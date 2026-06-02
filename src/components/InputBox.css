@@ -74,7 +74,24 @@
 
 .input-box__sentimentos {
   display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.input-box__sentimento-grupo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem;
+}
+
+.input-box__sentimento-categoria {
+  width: 100%;
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-secundaria);
+  font-weight: var(--fonte-subtitulo-peso);
+  color: var(--cor-texto-secundario);
+  margin-bottom: 0.125rem;
 }
 
 .input-box__sentimento-btn {

@@ -2,16 +2,16 @@ import { Desabafo } from '../types';
 
 /**
  * Calcula o total de interações de um desabafo.
- * Total = reacoes.apoio + reacoes.forca + reacoes.pouco + totalComentarios
+ * Total = soma de todas as reações + totalComentarios
  * Trata campos ausentes como 0.
  */
 export function calcularTotalInteracoes(desabafo: Desabafo): number {
-  const apoio = desabafo.reacoes?.apoio ?? 0;
-  const forca = desabafo.reacoes?.forca ?? 0;
-  const pouco = desabafo.reacoes?.pouco ?? 0;
+  const totalReacoes = desabafo.reacoes
+    ? Object.values(desabafo.reacoes).reduce((acc, val) => acc + (val ?? 0), 0)
+    : 0;
   const comentarios = desabafo.totalComentarios ?? 0;
 
-  return apoio + forca + pouco + comentarios;
+  return totalReacoes + comentarios;
 }
 
 /**

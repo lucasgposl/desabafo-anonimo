@@ -4,6 +4,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
+import { sentimentoPadrao, criarReacoesMock, criarReacoesZeradas } from '../helpers/fixtureHelper';
 
 // Mocks do Firestore
 const mockGetDocs = jest.fn();
@@ -87,9 +88,9 @@ describe('useDesabafo', () => {
     it('deve buscar e retornar desabafo encontrado', async () => {
       const mockData = {
         texto: 'Meu desabafo',
-        sentimento: 'triste',
+        sentimento: sentimentoPadrao(),
         criadoEm: { toDate: () => new Date('2024-01-01') },
-        reacoes: { apoio: 5, forca: 2, pouco: 1 },
+        reacoes: criarReacoesMock({ apoio: 5, forca: 2, pouco: 1 }),
         totalComentarios: 3,
         numero: 42,
       };
@@ -111,9 +112,9 @@ describe('useDesabafo', () => {
       expect(result.current.desabafo).toEqual({
         id: 'doc-abc',
         texto: 'Meu desabafo',
-        sentimento: 'triste',
+        sentimento: sentimentoPadrao(),
         criadoEm: new Date('2024-01-01'),
-        reacoes: { apoio: 5, forca: 2, pouco: 1 },
+        reacoes: criarReacoesMock({ apoio: 5, forca: 2, pouco: 1 }),
         totalComentarios: 3,
         numero: 42,
       });
@@ -156,9 +157,9 @@ describe('useDesabafo', () => {
     it('deve tratar criadoEm ausente com fallback para new Date()', async () => {
       const mockData = {
         texto: 'Desabafo sem timestamp',
-        sentimento: 'raiva',
+        sentimento: sentimentoPadrao(),
         criadoEm: null,
-        reacoes: { apoio: 0, forca: 0, pouco: 0 },
+        reacoes: criarReacoesZeradas(),
         totalComentarios: 0,
         numero: 1,
       };
@@ -183,18 +184,18 @@ describe('useDesabafo', () => {
     it('deve refazer busca quando numero muda', async () => {
       const mockData1 = {
         texto: 'Desabafo 1',
-        sentimento: 'triste',
+        sentimento: sentimentoPadrao(),
         criadoEm: { toDate: () => new Date('2024-01-01') },
-        reacoes: { apoio: 0, forca: 0, pouco: 0 },
+        reacoes: criarReacoesZeradas(),
         totalComentarios: 0,
         numero: 1,
       };
 
       const mockData2 = {
         texto: 'Desabafo 2',
-        sentimento: 'alivio',
+        sentimento: sentimentoPadrao(),
         criadoEm: { toDate: () => new Date('2024-02-01') },
-        reacoes: { apoio: 10, forca: 5, pouco: 2 },
+        reacoes: criarReacoesMock({ apoio: 10, forca: 5, pouco: 2 }),
         totalComentarios: 7,
         numero: 2,
       };
