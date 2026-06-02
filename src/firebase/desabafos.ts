@@ -13,6 +13,7 @@ import {
   serverTimestamp,
   writeBatch,
   runTransaction,
+  Timestamp,
   DocumentSnapshot,
   QueryConstraint,
 } from 'firebase/firestore';
@@ -137,6 +138,37 @@ export async function buscarDesabafos(
       : null;
 
   return { desabafos, ultimoDoc };
+}
+
+/**
+ * Busca todos os desabafos dos últimos 30 dias para a página Trends.
+ * Projeta os resultados SEM o campo uid para garantir anonimato.
+ * A ordenação por popularidade é feita no cliente.
+ */
+export async function buscarDesabafosTrends(): Promise<Desabafo[]> {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  const q = query(
+    collection(db, COLECAO),
+    where('criadoEm', '>=', Timestamp.fromDate(thirtyDaysAgo)),
+    orderBy('criadoEm', 'desc')
+  );
+
+  const snapshot = await getDocs(q);
+
+  return snapshot.docs.map((docSnap) => {
+    const data = docSnap.data() as DesabafoDoc;
+    return {
+      id: docSnap.id,
+      texto: data.texto,
+      sentimento: data.sentimento,
+      criadoEm: data.criadoEm?.toDate() ?? new Date(),
+      reacoes: data.reacoes,
+      totalComentarios: data.totalComentarios ?? 0,
+      numero: data.numero,
+      // uid é intencionalmente excluído para garantir anonimato
+    };
+  });
 }
 
 /**

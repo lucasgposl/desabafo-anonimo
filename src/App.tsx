@@ -19,6 +19,7 @@ import { PaginaModeracao } from './components/PaginaModeracao';
 import { RotaProtegidaAdmin } from './components/RotaProtegidaAdmin';
 import { PaginaFeed as PaginaFeedPage } from './pages/PaginaFeed';
 import { PaginaDesabafo } from './pages/PaginaDesabafo';
+import { PaginaTrends } from './pages/PaginaTrends';
 
 import type { Sentimento, Desabafo } from './types';
 
@@ -165,6 +166,7 @@ function App() {
       <Route path="/" element={<PaginaFeed />} />
       <Route path="/feed" element={<PaginaFeedPage />} />
       <Route path="/desabafo/:numero" element={<PaginaDesabafo />} />
+      <Route path="/trends" element={<PaginaTrends />} />
       <Route
         path="/moderacao"
         element={

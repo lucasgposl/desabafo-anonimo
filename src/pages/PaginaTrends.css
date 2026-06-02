@@ -1,0 +1,72 @@
+/* ===========================
+   PaginaTrends - Estilos da página Trends
+   =========================== */
+
+.pagina-trends__header {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-subtitulo);
+  font-weight: var(--fonte-subtitulo-peso);
+  color: var(--cor-texto);
+  margin: 0 0 1rem 0;
+  line-height: 1.4;
+}
+
+.pagina-trends__erro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  gap: 1rem;
+  font-family: var(--fonte-familia);
+  text-align: center;
+  padding: 2rem;
+}
+
+.pagina-trends__erro p {
+  font-size: var(--fonte-corpo);
+  color: var(--cor-erro, #9b2335);
+  margin: 0;
+}
+
+.pagina-trends__erro button {
+  background-color: var(--cor-acento);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-botao);
+  font-weight: var(--fonte-botao-peso);
+  transition: var(--transicao-padrao);
+}
+
+.pagina-trends__erro button:hover {
+  background-color: var(--cor-acento-hover);
+}
+
+.pagina-trends__vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  font-family: var(--fonte-familia);
+  text-align: center;
+  padding: 2rem;
+}
+
+.pagina-trends__vazio p {
+  font-size: var(--fonte-corpo);
+  color: var(--cor-texto-secundario);
+  margin: 0;
+}
+
+/* Responsivo - garantir visibilidade no viewport inicial em 360px */
+@media (max-width: 719px) {
+  .pagina-trends__header {
+    font-size: 1.1rem;
+    margin: 0 0 0.75rem 0;
+  }
+}

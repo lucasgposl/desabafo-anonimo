@@ -23,6 +23,9 @@ export function Header({ isAdmin = false, children }: HeaderProps) {
           <Link to="/feed" className="header__link-nav">
             Feed
           </Link>
+          <Link to="/trends" className="header__link-nav">
+            Trends
+          </Link>
           {isAdmin && (
             <Link to="/moderacao" className="header__link-moderacao">
               Moderação
