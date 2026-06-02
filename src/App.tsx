@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 
 import { useAuth } from './hooks/useAuth';
 import { useAdmin } from './hooks/useAdmin';
@@ -17,6 +17,8 @@ import { FeedControls } from './components/FeedControls';
 import { Feed } from './components/Feed';
 import { PaginaModeracao } from './components/PaginaModeracao';
 import { RotaProtegidaAdmin } from './components/RotaProtegidaAdmin';
+import { PaginaFeed as PaginaFeedPage } from './pages/PaginaFeed';
+import { PaginaDesabafo } from './pages/PaginaDesabafo';
 
 import type { Sentimento, Desabafo } from './types';
 
@@ -27,6 +29,7 @@ import type { Sentimento, Desabafo } from './types';
 function PaginaFeed() {
   const { usuario, isLoading: isAuthLoading, isAutenticado, login, logout } = useAuth();
   const { isAdmin } = useAdmin(usuario?.uid ?? null);
+  const navigate = useNavigate();
 
   const [filtro, setFiltro] = useState<Sentimento | 'todos'>('todos');
 
@@ -91,6 +94,13 @@ function PaginaFeed() {
     setFiltro(novoFiltro);
   }, []);
 
+  /**
+   * Handler de navegação para a página do desabafo.
+   */
+  const handleVerDesabafo = useCallback((numero: number) => {
+    navigate(`/desabafo/${numero}`);
+  }, [navigate]);
+
   return (
     <div className="app">
       <Header isAdmin={isAdmin}>
@@ -138,6 +148,7 @@ function PaginaFeed() {
             usuarioAutenticado={isAutenticado}
             reacaoUsuario={reacaoUsuario}
             uid={usuario?.uid ?? null}
+            onVerDesabafo={handleVerDesabafo}
           />
         )}
       </main>
@@ -152,6 +163,8 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<PaginaFeed />} />
+      <Route path="/feed" element={<PaginaFeedPage />} />
+      <Route path="/desabafo/:numero" element={<PaginaDesabafo />} />
       <Route
         path="/moderacao"
         element={

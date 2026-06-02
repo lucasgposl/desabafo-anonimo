@@ -1,6 +1,5 @@
 import {
   collection,
-  addDoc,
   query,
   orderBy,
   limit,
@@ -13,6 +12,7 @@ import {
   increment,
   serverTimestamp,
   writeBatch,
+  runTransaction,
   DocumentSnapshot,
   QueryConstraint,
 } from 'firebase/firestore';
@@ -50,7 +50,9 @@ export async function operacaoSegura<T>(
 }
 
 /**
- * Cria um novo desabafo no Firestore.
+ * Cria um novo desabafo no Firestore usando transação atômica.
+ * Gera um `numero` incremental lendo e incrementando `config/counters.totalDesabafos`.
+ * Se o documento `config/counters` não existir, cria com totalDesabafos: 1.
  * Requer uid do usuário autenticado.
  * Retorna o ID do documento criado.
  */
@@ -59,19 +61,34 @@ export async function criarDesabafo(
   sentimento: Sentimento,
   uid: string
 ): Promise<string> {
-  const docRef = await addDoc(collection(db, COLECAO), {
-    texto,
-    sentimento,
-    uid,
-    criadoEm: serverTimestamp(),
-    reacoes: {
-      apoio: 0,
-      forca: 0,
-      pouco: 0,
-    },
-    totalComentarios: 0,
+  const countersRef = doc(db, 'config', 'counters');
+  const novoDesabafoRef = doc(collection(db, COLECAO));
+
+  await runTransaction(db, async (transaction) => {
+    const countersSnap = await transaction.get(countersRef);
+    const total = countersSnap.exists()
+      ? (countersSnap.data().totalDesabafos ?? 0)
+      : 0;
+    const numero = total + 1;
+
+    transaction.set(countersRef, { totalDesabafos: numero }, { merge: true });
+
+    transaction.set(novoDesabafoRef, {
+      texto,
+      sentimento,
+      uid,
+      criadoEm: serverTimestamp(),
+      reacoes: {
+        apoio: 0,
+        forca: 0,
+        pouco: 0,
+      },
+      totalComentarios: 0,
+      numero,
+    });
   });
-  return docRef.id;
+
+  return novoDesabafoRef.id;
 }
 
 /**
@@ -109,6 +126,7 @@ export async function buscarDesabafos(
       criadoEm: data.criadoEm?.toDate() ?? new Date(),
       reacoes: data.reacoes,
       totalComentarios: data.totalComentarios ?? 0,
+      numero: data.numero,
       // uid é intencionalmente excluído para garantir anonimato
     };
   });

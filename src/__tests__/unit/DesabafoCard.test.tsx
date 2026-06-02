@@ -125,12 +125,12 @@ describe('DesabafoCard', () => {
     expect(container.querySelector('.desabafo-card__comentarios-section')).toBeInTheDocument();
   });
 
-  it('não renderiza seção de comentários quando totalComentarios === 0', () => {
+  it('renderiza seção de comentários mesmo quando totalComentarios === 0', () => {
     const desabafo = criarDesabafoMock({ totalComentarios: 0 });
     const { container } = renderComRouter(
       <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} />
     );
-    expect(container.querySelector('.desabafo-card__comentarios-section')).not.toBeInTheDocument();
+    expect(container.querySelector('.desabafo-card__comentarios-section')).toBeInTheDocument();
   });
 
   it('renderiza LinkVerMais quando totalComentarios > 5 e numero definido', () => {
@@ -174,5 +174,95 @@ describe('DesabafoCard', () => {
     );
     expect(container.querySelector('.desabafo-card__comentarios-toggle')).not.toBeInTheDocument();
     expect(container.querySelector('.desabafo-card__comentarios-btn')).not.toBeInTheDocument();
+  });
+
+  describe('badge de numero (#N)', () => {
+    it('exibe badge #N quando desabafo.numero está definido', () => {
+      const desabafo = criarDesabafoMock({ numero: 42 });
+      const { container } = renderComRouter(
+        <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} />
+      );
+      const badge = container.querySelector('.desabafo-card__numero');
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveTextContent('#42');
+    });
+
+    it('não exibe badge quando desabafo.numero é undefined (legado)', () => {
+      const desabafo = criarDesabafoMock(); // numero undefined
+      const { container } = renderComRouter(
+        <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} />
+      );
+      const badge = container.querySelector('.desabafo-card__numero');
+      expect(badge).not.toBeInTheDocument();
+    });
+
+    it('exibe badge com numero 1 corretamente', () => {
+      const desabafo = criarDesabafoMock({ numero: 1 });
+      const { container } = renderComRouter(
+        <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} />
+      );
+      const badge = container.querySelector('.desabafo-card__numero');
+      expect(badge).toHaveTextContent('#1');
+    });
+  });
+
+  describe('onVerDesabafo (navegação pelo card)', () => {
+    const mockOnVerDesabafo = jest.fn();
+
+    beforeEach(() => {
+      mockOnVerDesabafo.mockClear();
+    });
+
+    it('torna o conteúdo do card clicável quando onVerDesabafo e numero estão definidos', () => {
+      const desabafo = criarDesabafoMock({ numero: 7 });
+      const { container } = renderComRouter(
+        <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} onVerDesabafo={mockOnVerDesabafo} />
+      );
+      const conteudo = container.querySelector('.desabafo-card__conteudo');
+      expect(conteudo).toHaveClass('desabafo-card__conteudo--clicavel');
+      expect(conteudo).toHaveAttribute('role', 'button');
+      expect(conteudo).toHaveAttribute('tabindex', '0');
+    });
+
+    it('chama onVerDesabafo com o numero ao clicar no conteúdo', () => {
+      const desabafo = criarDesabafoMock({ numero: 42 });
+      const { container } = renderComRouter(
+        <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} onVerDesabafo={mockOnVerDesabafo} />
+      );
+      const conteudo = container.querySelector('.desabafo-card__conteudo')!;
+      fireEvent.click(conteudo);
+      expect(mockOnVerDesabafo).toHaveBeenCalledWith(42);
+    });
+
+    it('não torna o card clicável quando onVerDesabafo está definido mas numero é undefined', () => {
+      const desabafo = criarDesabafoMock(); // numero undefined
+      const { container } = renderComRouter(
+        <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} onVerDesabafo={mockOnVerDesabafo} />
+      );
+      const conteudo = container.querySelector('.desabafo-card__conteudo');
+      expect(conteudo).not.toHaveClass('desabafo-card__conteudo--clicavel');
+      expect(conteudo).not.toHaveAttribute('role');
+    });
+
+    it('não torna o card clicável quando onVerDesabafo não é fornecido', () => {
+      const desabafo = criarDesabafoMock({ numero: 7 });
+      const { container } = renderComRouter(
+        <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} />
+      );
+      const conteudo = container.querySelector('.desabafo-card__conteudo');
+      expect(conteudo).not.toHaveClass('desabafo-card__conteudo--clicavel');
+      expect(conteudo).not.toHaveAttribute('role');
+    });
+
+    it('mantém comportamento normal quando sem onVerDesabafo (compatibilidade)', () => {
+      const desabafo = criarDesabafoMock({ numero: 7 });
+      const { container } = renderComRouter(
+        <DesabafoCard desabafo={desabafo} onReagir={mockOnReagir} usuarioAutenticado={false} />
+      );
+      const conteudo = container.querySelector('.desabafo-card__conteudo')!;
+      fireEvent.click(conteudo);
+      // Não deve chamar nada — sem callback
+      expect(mockOnVerDesabafo).not.toHaveBeenCalled();
+    });
   });
 });

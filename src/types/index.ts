@@ -21,6 +21,7 @@ export interface DesabafoDoc {
     pouco: number;            // Contador "Eu acho é pouco"
   };
   totalComentarios: number;   // Contador de comentários (desnormalizado para performance)
+  numero?: number;            // Número incremental para URL amigável
 }
 
 // Modelo no React para exibição no feed (SEM uid)
@@ -94,6 +95,7 @@ export interface FeedProps {
   usuarioAutenticado: boolean;
   reacaoUsuario?: Record<string, TipoReacao | null>;
   uid?: string | null;
+  onVerDesabafo?: (numero: number) => void;
 }
 
 // Props do DesabafoCard
@@ -103,6 +105,7 @@ export interface DesabafoCardProps {
   usuarioAutenticado: boolean;
   reacaoAtiva?: TipoReacao | null;
   uid?: string | null;
+  onVerDesabafo?: (numero: number) => void;
 }
 
 // Props do ComentarioSection

@@ -20,6 +20,9 @@ export function Header({ isAdmin = false, children }: HeaderProps) {
         </div>
         <div className="header__acoes">
           {children}
+          <Link to="/feed" className="header__link-nav">
+            Feed
+          </Link>
           {isAdmin && (
             <Link to="/moderacao" className="header__link-moderacao">
               Moderação

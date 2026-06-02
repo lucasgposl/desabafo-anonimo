@@ -41,6 +41,19 @@
   gap: 0.75rem;
 }
 
+.header__link-nav {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-botao);
+  font-weight: var(--fonte-botao-peso);
+  color: var(--cor-acento);
+  text-decoration: none;
+  transition: var(--transicao-padrao);
+}
+
+.header__link-nav:hover {
+  color: var(--cor-acento-hover);
+}
+
 .header__link-moderacao {
   font-family: var(--fonte-familia);
   font-size: var(--fonte-botao);

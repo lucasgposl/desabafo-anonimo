@@ -13,7 +13,8 @@
       "disabled": false,
       "autoApprove": [
         "firebase_get_security_rules",
-        "firebase_list_apps"
+        "firebase_list_apps",
+        "firebase_validate_security_rules"
       ]
     }
   }

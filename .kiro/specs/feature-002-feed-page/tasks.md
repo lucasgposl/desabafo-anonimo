@@ -6,30 +6,30 @@ Criação da rota `/feed` com o componente `PaginaFeed`, extraído do bloco de f
 
 ## Tasks
 
-- [ ] 1. Criar estrutura de diretório src/pages/
+- [x] 1. Criar estrutura de diretório src/pages/
   - Criar o diretório `src/pages/` caso não exista
   - _Requirements: 1.1_
 
-- [ ] 2. Extrair PaginaFeed de App.tsx para src/pages/PaginaFeed.tsx
+- [x] 2. Extrair PaginaFeed de App.tsx para src/pages/PaginaFeed.tsx
   - Criar `src/pages/PaginaFeed.tsx` com o componente `PaginaFeed`
   - Mover para o novo arquivo: `Header`, `FeedControls`, `Feed` e os hooks `useDesabafos`, `useAuth`
   - Sem `InputBox` — a `PaginaFeed` não exibe o formulário de publicação
-  - Adicionar handler `handleVerDesabafo(numero)` que navega para `/desabafo/${numero}`
   - _Requirements: 1.1, 1.2, 2.1, 2.2, 2.3, 3.1, 4.1, 4.2_
 
-- [ ] 3. Adicionar rota /feed em App.tsx
+- [x] 3. Adicionar rota /feed em App.tsx
   - Importar `PaginaFeed` de `./pages/PaginaFeed`
   - Adicionar `<Route path="/feed" element={<PaginaFeed />} />` dentro do `<Routes>` existente
   - Garantir que a rota `/` e seu comportamento atual não sejam alterados
   - _Requirements: 1.1, 6.1, 6.2_
 
-- [ ] 4. Adicionar prop onVerDesabafo ao DesabafoCard
-  - Adicionar prop opcional `onVerDesabafo?: (numero: number) => void` à interface do componente
-  - Implementar o clique no card (ou botão "Ver") que dispara `onVerDesabafo(desabafo.numero)` quando fornecida
-  - Adicionar `cursor: pointer` ao card quando a prop estiver presente
+- [x] 4. Tornar DesabafoCard clicável para navegação (complementar ao LinkVerMais)
+  - Adicionar prop opcional `onVerDesabafo?: (numero: number) => void` à interface `DesabafoCardProps` em `src/types/index.ts`
+  - No `DesabafoCard`: envolver o bloco `.desabafo-card__conteudo` em um elemento clicável que dispara `onVerDesabafo(desabafo.numero)` quando a prop estiver presente e `desabafo.numero` definido
+  - Adicionar `cursor: pointer` ao conteúdo do card quando a prop estiver presente
+  - **Nota:** O `LinkVerMais` já existe (implementado via enhance-002) e navega para `/desabafo/:numero` quando há mais de 5 comentários. Esta task adiciona navegação pelo card inteiro como alternativa complementar.
   - _Requirements: 5.1, 5.2, 5.3_
 
-- [ ] 5. Adicionar link de navegação para /feed no Header
+- [x] 5. Adicionar link de navegação para /feed no Header
   - Adicionar `<Link to="/feed">Feed</Link>` no componente `Header`
   - Estilizar o link de forma consistente com os demais elementos do cabeçalho
   - _Requirements: 6.3_
@@ -37,7 +37,8 @@ Criação da rota `/feed` com o componente `PaginaFeed`, extraído do bloco de f
 ## Notes
 
 - A `PaginaFeed` não inclui `InputBox` — o formulário de publicação permanece exclusivo da rota `/`
-- A prop `onVerDesabafo` depende do campo `numero` do desabafo, que será adicionado pela spec `feature-003-desabafo-page`; implementar a prop agora com `numero` possivelmente `undefined` para permitir integração futura
+- O campo `numero` já existe na interface `Desabafo` (adicionado por enhance-002). A prop `onVerDesabafo` deve tratar `numero` possivelmente `undefined` (desabafos legados) — nesse caso, não tornar o card clicável
+- O `LinkVerMais` (enhance-002) já provê navegação para `/desabafo/:numero` quando `totalComentarios > 5`. A task 4 é complementar: permite navegar pelo clique no card inteiro, independente da quantidade de comentários
 - Os hooks `useDesabafos`, `useAuth` e `useReacoes` não precisam de modificação
 
 ## Task Dependency Graph

@@ -64,6 +64,14 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    match /config/counters {
+      // Leitura pública do contador
+      allow read: if true;
+
+      // Escrita apenas para usuários autenticados
+      allow write: if request.auth != null;
+    }
+
     match /admins/{adminId} {
       // Leitura: o próprio admin pode verificar se é admin, ou qualquer admin pode listar todos
       allow read: if isAuthenticated() && (request.auth.uid == adminId || isAdmin());

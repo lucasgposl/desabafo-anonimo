@@ -97,7 +97,7 @@ Refatorar a exibição de comentários no feed para que sejam sempre visíveis (
     - **Property 3: Ordenação de Comentários**
     - **Validates: Requirements 2.2, 5.4**
 
-- [~] 7. Checkpoint final — Garantir integridade
+- [ ] 7. Checkpoint final — Garantir integridade
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes

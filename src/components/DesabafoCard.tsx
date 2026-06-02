@@ -37,9 +37,17 @@ function obterCorSentimento(sentimento: Sentimento): string {
   return cores[sentimento];
 }
 
-export function DesabafoCard({ desabafo, onReagir, usuarioAutenticado, reacaoAtiva, uid }: DesabafoCardProps) {
+export function DesabafoCard({ desabafo, onReagir, usuarioAutenticado, reacaoAtiva, uid, onVerDesabafo }: DesabafoCardProps) {
   const handleReagir = (tipo: TipoReacao) => {
     onReagir(tipo);
+  };
+
+  const isClicavel = onVerDesabafo != null && desabafo.numero != null;
+
+  const handleClickConteudo = () => {
+    if (isClicavel) {
+      onVerDesabafo!(desabafo.numero!);
+    }
   };
 
   return (
@@ -47,11 +55,23 @@ export function DesabafoCard({ desabafo, onReagir, usuarioAutenticado, reacaoAti
       className="desabafo-card"
       style={{ borderLeftColor: obterCorSentimento(desabafo.sentimento) }}
     >
-      <div className="desabafo-card__conteudo">
+      <div
+        className={`desabafo-card__conteudo${isClicavel ? ' desabafo-card__conteudo--clicavel' : ''}`}
+        onClick={isClicavel ? handleClickConteudo : undefined}
+        role={isClicavel ? 'button' : undefined}
+        tabIndex={isClicavel ? 0 : undefined}
+        onKeyDown={isClicavel ? (e) => { if (e.key === 'Enter' || e.key === ' ') handleClickConteudo(); } : undefined}
+        aria-label={isClicavel ? 'Ver desabafo completo' : undefined}
+      >
         <p className="desabafo-card__texto">{desabafo.texto}</p>
-        <span className="desabafo-card__tempo">
-          {formatarTempoRelativo(desabafo.criadoEm)}
-        </span>
+        <div className="desabafo-card__meta">
+          <span className="desabafo-card__tempo">
+            {formatarTempoRelativo(desabafo.criadoEm)}
+          </span>
+          {desabafo.numero != null && (
+            <span className="desabafo-card__numero">#{desabafo.numero}</span>
+          )}
+        </div>
       </div>
 
       <div className="desabafo-card__reacoes">
@@ -89,20 +109,18 @@ export function DesabafoCard({ desabafo, onReagir, usuarioAutenticado, reacaoAti
         </button>
       </div>
 
-      {desabafo.totalComentarios > 0 && (
-        <div className="desabafo-card__comentarios-section">
-          <ComentarioSection
-            desabafoId={desabafo.id}
-            usuarioAutenticado={usuarioAutenticado}
-            uid={uid}
-            limite={5}
-            mostrarFormulario={false}
-          />
-          {desabafo.totalComentarios > 5 && desabafo.numero != null && (
-            <LinkVerMais numero={desabafo.numero} />
-          )}
-        </div>
-      )}
+      <div className="desabafo-card__comentarios-section">
+        <ComentarioSection
+          desabafoId={desabafo.id}
+          usuarioAutenticado={usuarioAutenticado}
+          uid={uid}
+          limite={5}
+          mostrarFormulario={true}
+        />
+        {desabafo.totalComentarios > 5 && desabafo.numero != null && (
+          <LinkVerMais numero={desabafo.numero} />
+        )}
+      </div>
     </article>
   );
 }

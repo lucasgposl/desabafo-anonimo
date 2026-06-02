@@ -15,6 +15,16 @@
   gap: 0.5rem;
 }
 
+.desabafo-card__conteudo--clicavel {
+  cursor: pointer;
+  border-radius: var(--borda-radius-card, 8px);
+  transition: var(--transicao-padrao);
+}
+
+.desabafo-card__conteudo--clicavel:hover {
+  opacity: 0.8;
+}
+
 .desabafo-card__texto {
   font-family: var(--fonte-familia);
   font-size: var(--fonte-corpo);
@@ -26,11 +36,25 @@
   word-break: break-word;
 }
 
+.desabafo-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .desabafo-card__tempo {
   font-family: var(--fonte-familia);
   font-size: var(--fonte-secundaria);
   font-weight: var(--fonte-secundaria-peso);
   color: var(--cor-texto-secundario);
+}
+
+.desabafo-card__numero {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-secundaria);
+  font-weight: var(--fonte-secundaria-peso);
+  color: var(--cor-texto-secundario);
+  opacity: 0.7;
 }
 
 .desabafo-card__reacoes {

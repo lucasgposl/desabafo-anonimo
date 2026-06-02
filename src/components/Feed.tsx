@@ -11,6 +11,7 @@ export function Feed({
   usuarioAutenticado,
   reacaoUsuario,
   uid,
+  onVerDesabafo,
 }: FeedProps) {
   if (isLoading && desabafos.length === 0) {
     return (
@@ -46,6 +47,7 @@ export function Feed({
             usuarioAutenticado={usuarioAutenticado}
             reacaoAtiva={reacaoUsuario?.[desabafo.id] ?? null}
             uid={uid}
+            onVerDesabafo={onVerDesabafo}
           />
         ))}
       </div>

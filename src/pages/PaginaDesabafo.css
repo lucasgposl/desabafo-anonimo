@@ -1,0 +1,184 @@
+.pagina-desabafo__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-corpo);
+  color: var(--cor-texto-secundario);
+}
+
+.pagina-desabafo__nao-encontrado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  gap: 1rem;
+  font-family: var(--fonte-familia);
+  text-align: center;
+  padding: 2rem;
+}
+
+.pagina-desabafo__nao-encontrado p {
+  font-size: var(--fonte-corpo);
+  color: var(--cor-texto);
+  margin: 0;
+}
+
+.pagina-desabafo__link-voltar {
+  color: var(--cor-acento);
+  text-decoration: none;
+  font-weight: var(--fonte-botao-peso);
+  transition: var(--transicao-padrao);
+}
+
+.pagina-desabafo__link-voltar:hover {
+  text-decoration: underline;
+}
+
+.pagina-desabafo__erro {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-corpo);
+  color: var(--cor-erro, #e74c3c);
+  padding: 2rem;
+  text-align: center;
+}
+
+.pagina-desabafo {
+  max-width: var(--largura-maxima);
+  margin: 0 auto;
+  padding: var(--espacamento-card);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-feed);
+}
+
+.pagina-desabafo__card {
+  background-color: var(--cor-superficie);
+  border-radius: var(--borda-radius-card);
+  border-left: var(--borda-sentimento) solid;
+  padding: var(--espacamento-card);
+  box-shadow: var(--sombra-card);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pagina-desabafo__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.pagina-desabafo__numero {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-secundaria);
+  font-weight: var(--fonte-botao-peso);
+  color: var(--cor-texto-secundario);
+  background-color: var(--cor-superficie-alt);
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+}
+
+.pagina-desabafo__sentimento-badge {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-secundaria);
+  font-weight: var(--fonte-botao-peso);
+  color: var(--cor-texto);
+  background-color: var(--cor-superficie-alt);
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+}
+
+.pagina-desabafo__tempo {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-secundaria);
+  font-weight: var(--fonte-secundaria-peso);
+  color: var(--cor-texto-secundario);
+}
+
+.pagina-desabafo__texto {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-corpo);
+  font-weight: var(--fonte-corpo-peso);
+  color: var(--cor-texto);
+  margin: 0;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.pagina-desabafo__reacoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pagina-desabafo__reacao-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  background-color: var(--cor-superficie-alt);
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: var(--transicao-padrao);
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-secundaria);
+  font-weight: var(--fonte-botao-peso);
+  color: var(--cor-texto);
+}
+
+.pagina-desabafo__reacao-btn:hover {
+  transform: scale(1.05);
+  border-color: var(--cor-acento);
+}
+
+.pagina-desabafo__reacao-btn:active {
+  transform: scale(0.98);
+}
+
+.pagina-desabafo__reacao-btn--ativo {
+  border-color: var(--cor-acento);
+  background-color: rgba(123, 104, 238, 0.15);
+}
+
+.pagina-desabafo__reacao-btn--ativo .pagina-desabafo__reacao-label {
+  color: var(--cor-acento);
+}
+
+.pagina-desabafo__reacao-btn--ativo .pagina-desabafo__reacao-contador {
+  color: var(--cor-acento);
+}
+
+.pagina-desabafo__reacao-emoji {
+  font-size: 1rem;
+}
+
+.pagina-desabafo__reacao-label {
+  color: var(--cor-texto);
+}
+
+.pagina-desabafo__reacao-contador {
+  color: var(--cor-texto-secundario);
+  font-size: var(--fonte-secundaria);
+  margin-left: 0.25rem;
+}
+
+@media (max-width: 720px) {
+  .pagina-desabafo__reacoes {
+    flex-direction: column;
+  }
+
+  .pagina-desabafo__reacao-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
