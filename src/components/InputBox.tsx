@@ -1,6 +1,28 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { InputBoxProps, Sentimento } from '../types';
+import { EMOJIS_EXPANDIDOS } from '../constants/emojis';
 import './InputBox.css';
+
+export interface EmojiItem {
+  char: string;
+  label: string;
+}
+
+export function inserirEmojiNoTexto(
+  texto: string,
+  emoji: string,
+  cursorPos: number,
+  maxCaracteres: number
+): { novoTexto: string; novaPosicao: number } | null {
+  if (texto.length + emoji.length > maxCaracteres) {
+    return null;
+  }
+
+  const novoTexto = texto.slice(0, cursorPos) + emoji + texto.slice(cursorPos);
+  const novaPosicao = cursorPos + emoji.length;
+
+  return { novoTexto, novaPosicao };
+}
 
 const SENTIMENTO_PADRAO: Sentimento = 'triste';
 const MAX_CARACTERES = 2000;
@@ -11,10 +33,32 @@ const SENTIMENTOS: { valor: Sentimento; icone: string; label: string }[] = [
   { valor: 'alivio', icone: '😌', label: 'Alívio' },
 ];
 
+// Backwards compatibility: testes existentes importam EMOJIS daqui
+export const EMOJIS = EMOJIS_EXPANDIDOS;
+
 export function InputBox({ onPublicar, isPublicando }: InputBoxProps) {
   const [texto, setTexto] = useState('');
   const [sentimento, setSentimento] = useState<Sentimento>(SENTIMENTO_PADRAO);
   const [feedback, setFeedback] = useState<{ tipo: 'sucesso' | 'erro'; mensagem: string } | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const inserirEmoji = (emoji: string) => {
+    const textarea = textareaRef.current;
+    const cursorPos = textarea?.selectionStart ?? texto.length;
+
+    const resultado = inserirEmojiNoTexto(texto, emoji, cursorPos, MAX_CARACTERES);
+    if (!resultado) return;
+
+    setTexto(resultado.novoTexto);
+
+    requestAnimationFrame(() => {
+      if (textarea) {
+        textarea.focus();
+        textarea.selectionStart = resultado.novaPosicao;
+        textarea.selectionEnd = resultado.novaPosicao;
+      }
+    });
+  };
 
   const mostrarFeedback = useCallback((tipo: 'sucesso' | 'erro', mensagem: string) => {
     setFeedback({ tipo, mensagem });
@@ -55,6 +99,7 @@ export function InputBox({ onPublicar, isPublicando }: InputBoxProps) {
   return (
     <div className="input-box">
       <textarea
+        ref={textareaRef}
         className="input-box__textarea"
         placeholder="O que você está sentindo? Este é um espaço seguro para se expressar..."
         value={texto}
@@ -63,6 +108,22 @@ export function InputBox({ onPublicar, isPublicando }: InputBoxProps) {
         maxLength={MAX_CARACTERES}
         aria-label="Texto do desabafo"
       />
+
+      <div className="input-box__emoji-bar" role="toolbar" aria-label="Emojis">
+        {EMOJIS_EXPANDIDOS.map((emoji) => (
+          <button
+            key={emoji.char}
+            type="button"
+            className="input-box__emoji-btn"
+            onClick={() => inserirEmoji(emoji.char)}
+            disabled={isPublicando}
+            aria-label={emoji.label}
+            title={emoji.label}
+          >
+            {emoji.char}
+          </button>
+        ))}
+      </div>
 
       <div className="input-box__controles">
         <div className="input-box__sentimentos" role="radiogroup" aria-label="Sentimento">

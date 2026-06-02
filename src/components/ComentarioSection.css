@@ -121,6 +121,34 @@
   cursor: not-allowed;
 }
 
+.comentario-section__emoji-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  padding: 0.25rem 0;
+}
+
+.comentario-section__emoji-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0.25rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transicao-padrao);
+}
+
+.comentario-section__emoji-btn:hover:not(:disabled) {
+  transform: scale(1.2);
+  background-color: var(--cor-superficie-alt);
+}
+
+.comentario-section__emoji-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .comentario-section__controles {
   display: flex;
   align-items: center;

@@ -1,6 +1,8 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { ComentarioSectionProps, Comentario } from '../types';
 import { buscarComentarios, criarComentario } from '../firebase/comentarios';
+import { EMOJIS_EXPANDIDOS } from '../constants/emojis';
+import { inserirEmojiNoTexto } from './InputBox';
 import './ComentarioSection.css';
 
 const MAX_CARACTERES_COMENTARIO = 500;
@@ -36,6 +38,25 @@ export function ComentarioSection({ desabafoId, usuarioAutenticado, uid, limite,
   const [texto, setTexto] = useState('');
   const [isPublicando, setIsPublicando] = useState(false);
   const [feedback, setFeedback] = useState<{ tipo: 'sucesso' | 'erro'; mensagem: string } | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const inserirEmoji = (emoji: string) => {
+    const textarea = textareaRef.current;
+    const cursorPos = textarea?.selectionStart ?? texto.length;
+
+    const resultado = inserirEmojiNoTexto(texto, emoji, cursorPos, MAX_CARACTERES_COMENTARIO);
+    if (!resultado) return;
+
+    setTexto(resultado.novoTexto);
+
+    requestAnimationFrame(() => {
+      if (textarea) {
+        textarea.focus();
+        textarea.selectionStart = resultado.novaPosicao;
+        textarea.selectionEnd = resultado.novaPosicao;
+      }
+    });
+  };
 
   const mostrarFeedback = useCallback((tipo: 'sucesso' | 'erro', mensagem: string) => {
     setFeedback({ tipo, mensagem });
@@ -140,6 +161,7 @@ export function ComentarioSection({ desabafoId, usuarioAutenticado, uid, limite,
               usuarioAutenticado ? (
                 <div className="comentario-section__formulario">
                   <textarea
+                    ref={textareaRef}
                     className="comentario-section__textarea"
                     placeholder="Escreva um comentário de apoio..."
                     value={texto}
@@ -148,6 +170,21 @@ export function ComentarioSection({ desabafoId, usuarioAutenticado, uid, limite,
                     maxLength={MAX_CARACTERES_COMENTARIO}
                     aria-label="Texto do comentário"
                   />
+                  <div className="comentario-section__emoji-bar" role="toolbar" aria-label="Emojis">
+                    {EMOJIS_EXPANDIDOS.map((emoji) => (
+                      <button
+                        key={emoji.char}
+                        type="button"
+                        className="comentario-section__emoji-btn"
+                        onClick={() => inserirEmoji(emoji.char)}
+                        disabled={isPublicando}
+                        aria-label={emoji.label}
+                        title={emoji.label}
+                      >
+                        {emoji.char}
+                      </button>
+                    ))}
+                  </div>
                   <div className="comentario-section__controles">
                     <span
                       className={`comentario-section__contador ${

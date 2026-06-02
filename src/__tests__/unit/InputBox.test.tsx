@@ -1,6 +1,6 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { InputBox } from '../../components/InputBox';
+import { InputBox, EMOJIS } from '../../components/InputBox';
 
 describe('InputBox', () => {
   const mockOnPublicar = jest.fn().mockResolvedValue(undefined);
@@ -34,8 +34,9 @@ describe('InputBox', () => {
 
     it('sentimento padrão é Tristeza (triste)', () => {
       render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
-      const select = screen.getByLabelText('Sentimento') as HTMLSelectElement;
-      expect(select.value).toBe('triste');
+      const sentimentoGroup = screen.getByRole('radiogroup', { name: 'Sentimento' });
+      const tristezaBtn = sentimentoGroup.querySelector('button[aria-label="Tristeza"]')!;
+      expect(tristezaBtn).toHaveAttribute('aria-pressed', 'true');
     });
 
     it('exibe botão "Publicar"', () => {
@@ -87,9 +88,10 @@ describe('InputBox', () => {
     it('chama onPublicar com sentimento selecionado', async () => {
       render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
       const textarea = screen.getByLabelText('Texto do desabafo');
-      const select = screen.getByLabelText('Sentimento');
       fireEvent.change(textarea, { target: { value: 'Estou com raiva' } });
-      fireEvent.change(select, { target: { value: 'raiva' } });
+      const sentimentoGroup = screen.getByRole('radiogroup', { name: 'Sentimento' });
+      const raivaSentimentoBtn = sentimentoGroup.querySelector('button[aria-label="Raiva"]')!;
+      fireEvent.click(raivaSentimentoBtn);
       fireEvent.click(screen.getByText('Publicar'));
 
       await waitFor(() => {
@@ -111,13 +113,15 @@ describe('InputBox', () => {
     it('restaura sentimento padrão após sucesso', async () => {
       render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
       const textarea = screen.getByLabelText('Texto do desabafo');
-      const select = screen.getByLabelText('Sentimento') as HTMLSelectElement;
       fireEvent.change(textarea, { target: { value: 'Texto' } });
-      fireEvent.change(select, { target: { value: 'raiva' } });
+      const sentimentoGroup = screen.getByRole('radiogroup', { name: 'Sentimento' });
+      const raivaSentimentoBtn = sentimentoGroup.querySelector('button[aria-label="Raiva"]')!;
+      fireEvent.click(raivaSentimentoBtn);
       fireEvent.click(screen.getByText('Publicar'));
 
       await waitFor(() => {
-        expect(select.value).toBe('triste');
+        const tristezaBtn = sentimentoGroup.querySelector('button[aria-label="Tristeza"]')!;
+        expect(tristezaBtn).toHaveAttribute('aria-pressed', 'true');
       });
     });
 
@@ -174,7 +178,7 @@ describe('InputBox', () => {
 
     it('botão está desabilitado quando isPublicando é true', () => {
       render(<InputBox onPublicar={mockOnPublicar} isPublicando={true} />);
-      const button = screen.getByRole('button');
+      const button = screen.getByText('Publicando...').closest('button')!;
       expect(button).toBeDisabled();
     });
 
@@ -184,10 +188,59 @@ describe('InputBox', () => {
       expect(textarea).toBeDisabled();
     });
 
-    it('select está desabilitado quando isPublicando é true', () => {
+    it('botões de sentimento estão desabilitados quando isPublicando é true', () => {
       render(<InputBox onPublicar={mockOnPublicar} isPublicando={true} />);
-      const select = screen.getByLabelText('Sentimento');
-      expect(select).toBeDisabled();
+      const sentimentoGroup = screen.getByRole('radiogroup', { name: 'Sentimento' });
+      const buttons = sentimentoGroup.querySelectorAll('button');
+      buttons.forEach((btn) => {
+        expect(btn).toBeDisabled();
+      });
+    });
+  });
+
+  describe('Emoji Picker Bar', () => {
+    it('renderiza a barra com role="toolbar" e aria-label="Emojis"', () => {
+      render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
+      const toolbar = screen.getByRole('toolbar', { name: 'Emojis' });
+      expect(toolbar).toBeInTheDocument();
+    });
+
+    it('renderiza no mínimo 25 botões de emoji', () => {
+      render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
+      const toolbar = screen.getByRole('toolbar', { name: 'Emojis' });
+      const buttons = within(toolbar).getAllByRole('button');
+      expect(buttons.length).toBeGreaterThanOrEqual(25);
+    });
+
+    it('a barra fica entre o textarea e os controles no DOM', () => {
+      render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
+      const toolbar = screen.getByRole('toolbar', { name: 'Emojis' });
+      const textarea = screen.getByLabelText('Texto do desabafo');
+
+      // previousElementSibling of toolbar should be the textarea
+      expect(toolbar.previousElementSibling).toBe(textarea);
+      // nextElementSibling of toolbar should be the controls div
+      expect(toolbar.nextElementSibling).toHaveClass('input-box__controles');
+    });
+
+    it('todos os botões ficam desabilitados quando isPublicando=true', () => {
+      render(<InputBox onPublicar={mockOnPublicar} isPublicando={true} />);
+      const toolbar = screen.getByRole('toolbar', { name: 'Emojis' });
+      const buttons = within(toolbar).getAllByRole('button');
+      buttons.forEach((btn) => {
+        expect(btn).toBeDisabled();
+      });
+    });
+
+    it('clicar em um emoji insere no valor do textarea', () => {
+      render(<InputBox onPublicar={mockOnPublicar} isPublicando={false} />);
+      const textarea = screen.getByLabelText('Texto do desabafo') as HTMLTextAreaElement;
+      const toolbar = screen.getByRole('toolbar', { name: 'Emojis' });
+      const firstEmojiButton = within(toolbar).getAllByRole('button')[0];
+
+      fireEvent.click(firstEmojiButton);
+
+      expect(textarea.value).toContain(EMOJIS[0].char);
     });
   });
 });

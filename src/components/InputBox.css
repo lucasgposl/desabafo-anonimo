@@ -37,6 +37,34 @@
   cursor: not-allowed;
 }
 
+.input-box__emoji-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  padding: 0.25rem 0;
+}
+
+.input-box__emoji-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0.25rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transicao-padrao);
+}
+
+.input-box__emoji-btn:hover:not(:disabled) {
+  transform: scale(1.2);
+  background-color: var(--cor-superficie-alt);
+}
+
+.input-box__emoji-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .input-box__controles {
   display: flex;
   align-items: center;
