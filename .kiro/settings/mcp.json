@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "firebase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "firebase-tools@latest",
+        "experimental:mcp"
+      ],
+      "env": {
+        "FIREBASE_PROJECT": "desabafo-anonimo-ifal"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "firebase_get_security_rules",
+        "firebase_list_apps"
+      ]
+    }
+  }
+}

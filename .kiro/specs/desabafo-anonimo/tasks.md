@@ -48,8 +48,8 @@ Plano de implementação para a aplicação Desabafo Anônimo — uma SPA React 
       - Coleção admins: leitura apenas do próprio admin, escrita bloqueada
     - _Requirements: 5.3, 5.5, 6.1, 7.1, 10.1, 11.3_
 
-- [ ] 3. Serviço de autenticação Firebase
-  - [ ] 3.1 Implementar serviço de autenticação
+- [x] 3. Serviço de autenticação Firebase
+  - [x] 3.1 Implementar serviço de autenticação
     - Criar `src/firebase/auth.ts` com as funções:
       - `loginComGoogle()`: usa `signInWithPopup` com `GoogleAuthProvider`
       - `logout()`: usa `signOut`
@@ -57,14 +57,14 @@ Plano de implementação para a aplicação Desabafo Anônimo — uma SPA React 
     - Exportar instância do `GoogleAuthProvider`
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5_
 
-  - [ ] 3.2 Implementar serviço de administração
+  - [x] 3.2 Implementar serviço de administração
     - Criar `src/firebase/admin.ts` com as funções:
       - `verificarAdmin(uid)`: consulta documento na coleção `admins` com o uid
       - `buscarTodosDesabafosAdmin()`: busca todos desabafos COM uid (para moderação)
       - `buscarTodosComentariosAdmin()`: busca todos comentários COM uid (para moderação)
     - _Requirements: 7.1, 7.2, 7.3, 7.4_
 
-  - [ ] 3.3 Implementar serviço de comentários
+  - [x] 3.3 Implementar serviço de comentários
     - Criar `src/firebase/comentarios.ts` com as funções:
       - `criarComentario(desabafoId, texto, uid)`: usa `addDoc` na subcoleção `comentarios`
       - `buscarComentarios(desabafoId, limite)`: busca comentários ordenados por data ASC, projeta sem uid
@@ -73,45 +73,45 @@ Plano de implementação para a aplicação Desabafo Anônimo — uma SPA React 
     - Incrementar/decrementar `totalComentarios` no documento pai ao criar/remover
     - _Requirements: 11.3, 11.4, 7.6, 7.8, 5.2_
 
-- [ ] 4. Identidade visual e estilos globais
-  - [ ] 4.1 Implementar variáveis CSS e tema escuro
+- [x] 4. Identidade visual e estilos globais
+  - [x] 4.1 Implementar variáveis CSS e tema escuro
     - Criar `src/styles/variables.css` com todas as CSS custom properties definidas no design (cores, tipografia, espaçamento)
     - Criar `src/styles/global.css` com reset básico, fonte Inter (Google Fonts), e estilos base do body
     - Definir cores por sentimento: `--cor-tristeza: #4a90d9`, `--cor-raiva: #d94a4a`, `--cor-alivio: #4ad9a0`
     - Implementar transições e efeitos (hover, scale, fade-in/fade-out)
     - _Requirements: 8.2, 8.4, 8.5_
 
-  - [ ] 4.2 Implementar estilos responsivos
+  - [x] 4.2 Implementar estilos responsivos
     - Criar `src/styles/responsive.css` com media queries para viewport < 720px
     - Container principal ocupa largura total com padding interno em telas pequenas
     - Garantir legibilidade sem scroll horizontal a partir de 320px
     - _Requirements: 8.4, 8.5_
 
-- [ ] 5. Checkpoint - Verificar setup base e serviços
+- [x] 5. Checkpoint - Verificar setup base e serviços
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 6. Componentes de apresentação (Parte 1 - Header e Auth)
-  - [ ] 6.1 Implementar componente Header
+- [x] 6. Componentes de apresentação (Parte 1 - Header e Auth)
+  - [x] 6.1 Implementar componente Header
     - Criar `src/components/Header.tsx` e `src/components/Header.css`
     - Renderizar título "Desabafo Anônimo" e aviso sobre ajuda profissional
     - Incluir slot para LoginButton e link de moderação (condicional para admins)
     - _Requirements: 8.1, 7.2_
 
-  - [ ] 6.2 Implementar componente LoginButton
+  - [x] 6.2 Implementar componente LoginButton
     - Criar `src/components/LoginButton.tsx` e `src/components/LoginButton.css`
     - Estado visitante: exibir botão "Entrar com Google"
     - Estado autenticado: exibir botão "Sair"
     - Estado loading: exibir indicador de carregamento durante fluxo de auth
     - _Requirements: 10.1, 10.2, 10.3, 10.4_
 
-  - [ ] 6.3 Implementar componente MensagemLogin
+  - [x] 6.3 Implementar componente MensagemLogin
     - Criar `src/components/MensagemLogin.tsx` e `src/components/MensagemLogin.css`
     - Exibir mensagem convidando visitante a fazer login para publicar
     - Visível apenas quando usuário não está autenticado
     - _Requirements: 10.8, 1.10_
 
-- [ ] 7. Componentes de apresentação (Parte 2 - Feed e Interação)
-  - [ ] 7.1 Implementar componente InputBox
+- [x] 7. Componentes de apresentação (Parte 2 - Feed e Interação)
+  - [x] 7.1 Implementar componente InputBox
     - Criar `src/components/InputBox.tsx` e `src/components/InputBox.css`
     - Textarea com placeholder acolhedor
     - Select de sentimento com opções Tristeza, Raiva, Alívio (padrão: Tristeza)
@@ -122,14 +122,14 @@ Plano de implementação para a aplicação Desabafo Anônimo — uma SPA React 
     - Visível apenas para usuários autenticados
     - _Requirements: 1.1, 1.2, 1.5, 1.6, 1.7, 1.8, 1.9, 1.10, 1.11_
 
-  - [ ] 7.2 Implementar componente DesabafoCard
+  - [x] 7.2 Implementar componente DesabafoCard
     - Criar `src/components/DesabafoCard.tsx` e `src/components/DesabafoCard.css`
     - Renderizar texto do desabafo, tempo relativo, borda lateral colorida por sentimento
     - Três botões de reação com contadores: "Eu me identifiquei", "Força", "Eu acho é pouco"
     - Botão para expandir seção de comentários com contador de comentários
     - _Requirements: 2.2, 4.1, 4.2, 8.2, 8.3, 11.1, 11.6_
 
-  - [ ] 7.3 Implementar componente Feed
+  - [x] 7.3 Implementar componente Feed
     - Criar `src/components/Feed.tsx` e `src/components/Feed.css`
     - Renderizar lista de DesabafoCards
     - Exibir LoadingIndicator durante carregamento
@@ -138,20 +138,20 @@ Plano de implementação para a aplicação Desabafo Anônimo — uma SPA React 
     - Não exibir informações identificáveis do autor
     - _Requirements: 2.1, 2.3, 2.5, 2.6, 2.7, 6.3_
 
-  - [ ] 7.4 Implementar componente FeedControls
+  - [x] 7.4 Implementar componente FeedControls
     - Criar `src/components/FeedControls.tsx` e `src/components/FeedControls.css`
     - Select de filtro: "Todos", "Tristeza", "Raiva", "Alívio" (padrão: Todos)
     - Contador de desabafos no formato "{número} desabafos"
     - _Requirements: 2.4, 3.1, 3.4, 3.5_
 
-  - [ ] 7.5 Implementar componente ConfirmDialog
+  - [x] 7.5 Implementar componente ConfirmDialog
     - Criar `src/components/ConfirmDialog.tsx` e `src/components/ConfirmDialog.css`
     - Dialog de confirmação com mensagem, botão confirmar e botão cancelar
     - Reutilizável para remoção de desabafos, comentários e apagar tudo
     - _Requirements: 7.5, 7.7, 7.11_
 
-- [ ] 8. Componente de Comentários
-  - [ ] 8.1 Implementar componente ComentarioSection
+- [x] 8. Componente de Comentários
+  - [x] 8.1 Implementar componente ComentarioSection
     - Criar `src/components/ComentarioSection.tsx` e `src/components/ComentarioSection.css`
     - Botão para expandir/colapsar seção de comentários
     - Lista de comentários ordenados do mais antigo para o mais recente (máximo 50)
@@ -161,8 +161,8 @@ Plano de implementação para a aplicação Desabafo Anônimo — uma SPA React 
     - MensagemLoginComentario para visitantes (convidar a fazer login)
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.9, 11.10, 11.11_
 
-- [ ] 9. Custom Hooks e lógica de estado
-  - [ ] 9.1 Implementar hook useAuth
+- [x] 9. Custom Hooks e lógica de estado
+  - [x] 9.1 Implementar hook useAuth
     - Criar `src/hooks/useAuth.ts`
     - Observar estado de autenticação via `onAuthStateChanged`
     - Gerenciar estado: `usuario` (UsuarioAuth | null), `isLoading`, `isAutenticado`
@@ -171,14 +171,14 @@ Plano de implementação para a aplicação Desabafo Anônimo — uma SPA React 
     - Restaurar sessão automaticamente ao carregar página
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7_
 
-  - [ ] 9.2 Implementar hook useAdmin
+  - [x] 9.2 Implementar hook useAdmin
     - Criar `src/hooks/useAdmin.ts`
     - Receber uid como parâmetro
     - Consultar coleção `admins` no Firestore para verificar se uid é admin
     - Retornar `{ isAdmin, isLoading }`
     - _Requirements: 7.1, 7.2_
 
-  - [ ] 9.3 Implementar hook useDesabafos
+  - [x] 9.3 Implementar hook useDesabafos
     - Criar `src/hooks/useDesabafos.ts`
     - Gerenciar estado do feed: desabafos, isLoading, error, hasMore, lastDoc, total
     - Buscar desabafos do Firestore na montagem e quando filtro muda
@@ -187,7 +187,7 @@ Plano de implementação para a aplicação Desabafo Anônimo — uma SPA React 
     - Limitar a 20 desabafos por carregamento
     - _Requirements: 2.1, 2.5, 3.2, 6.2, 6.3, 6.4, 6.5, 6.6_
 
-  - [ ] 9.4 Implementar hook usePublicar
+  - [x] 9.4 Implementar hook usePublicar
     - Criar `src/hooks/usePublicar.ts`
     - Receber uid como parâmetro (requer autenticação)
     - Validar texto antes de enviar (não vazio, não whitespace, ≤2000 chars)
@@ -196,7 +196,7 @@ Plano de implementação para a aplicação Desabafo Anônimo — uma SPA React 
     - Gerenciar estado `isPublicando` e `error`
     - _Requirements: 1.3, 1.4, 1.7, 1.8, 1.9, 1.11_
 
-  - [ ] 9.5 Implementar hook useReacoes
+  - [x] 9.5 Implementar hook useReacoes
     - Criar `src/hooks/useReacoes.ts`
     - Implementar optimistic update: incrementar localmente antes da confirmação
     - Chamar `incrementarReacao` do serviço Firebase
@@ -204,7 +204,7 @@ Plano de implementação para a aplicação Desabafo Anônimo — uma SPA React 
     - Não requer autenticação
     - _Requirements: 4.3, 4.4, 4.5, 4.6_
 
-  - [ ] 9.6 Implementar hook useComentarios
+  - [x] 9.6 Implementar hook useComentarios
     - Criar `src/hooks/useComentarios.ts`
     - Receber `desabafoId` como parâmetro
     - Buscar comentários da subcoleção (máximo 50, ordenados por data ASC)
@@ -213,24 +213,24 @@ Plano de implementação para a aplicação Desabafo Anônimo — uma SPA React 
     - Inserir novo comentário na lista local após sucesso
     - _Requirements: 11.2, 11.3, 11.4, 11.6, 11.7, 11.8, 11.9_
 
-  - [ ] 9.7 Implementar hook useTempoRelativo
+  - [x] 9.7 Implementar hook useTempoRelativo
     - Criar `src/hooks/useTempoRelativo.ts`
     - Calcular tempo relativo: "agora" (<60s), "X min atrás" (60s-60min), "X h atrás" (60min-24h), "dd/MM/yyyy" (≥24h)
     - Auto-refresh a cada 60 segundos via `setInterval`
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
 
-  - [ ] 9.8 Implementar funções utilitárias de validação
+  - [x] 9.8 Implementar funções utilitárias de validação
     - Criar `src/utils/validacao.ts` com:
       - `validarTextoDesabafo(texto: string): { valido: boolean, erro?: string }` (limite 2000)
       - `validarTextoComentario(texto: string): { valido: boolean, erro?: string }` (limite 500)
     - Criar `src/utils/tempoRelativo.ts` com função pura `formatarTempoRelativo(data: Date, agora: Date): string`
     - _Requirements: 1.7, 1.8, 9.1, 9.2, 9.3, 9.4, 11.7, 11.8_
 
-- [ ] 10. Checkpoint - Verificar componentes e hooks
+- [x] 10. Checkpoint - Verificar componentes e hooks
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 11. Página de Moderação
-  - [ ] 11.1 Implementar componente PaginaModeracao
+- [x] 11. Página de Moderação
+  - [x] 11.1 Implementar componente PaginaModeracao
     - Criar `src/components/PaginaModeracao.tsx` e `src/components/PaginaModeracao.css`
     - Exibir lista de todos os desabafos (trecho até 100 chars, sentimento, data, botão remover)
     - Exibir lista de todos os comentários (trecho até 100 chars, data, botão remover)
@@ -240,7 +240,7 @@ Plano de implementação para a aplicação Desabafo Anônimo — uma SPA React 
     - Exibir mensagem de erro em caso de falha na remoção
     - _Requirements: 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.11, 7.12, 7.13_
 
-  - [ ] 11.2 Implementar componente RotaProtegidaAdmin
+  - [x] 11.2 Implementar componente RotaProtegidaAdmin
     - Criar `src/components/RotaProtegidaAdmin.tsx`
     - Verificar autenticação e status de admin
     - Redirecionar visitantes para feed com mensagem "Faça login para acessar"
@@ -248,8 +248,8 @@ Plano de implementação para a aplicação Desabafo Anônimo — uma SPA React 
     - Exibir loading enquanto verifica status
     - _Requirements: 7.9, 7.10_
 
-- [ ] 12. Integração e wiring do App
-  - [ ] 12.1 Montar componente App principal com roteamento
+- [x] 12. Integração e wiring do App
+  - [x] 12.1 Montar componente App principal com roteamento
     - Atualizar `src/App.tsx` integrando todos os componentes e hooks
     - Configurar react-router-dom com rotas: `/` (feed) e `/moderacao` (PaginaModeracao protegida)
     - Conectar `useAuth` com `LoginButton` e controle de visibilidade
@@ -262,12 +262,12 @@ Plano de implementação para a aplicação Desabafo Anônimo — uma SPA React 
     - Atualizar contador ao mudar filtro ou publicar
     - _Requirements: 1.5, 1.10, 2.3, 2.4, 3.2, 3.3, 3.4, 7.2, 10.3, 10.4, 10.8, 10.9_
 
-  - [ ] 12.2 Configurar ponto de entrada da aplicação
+  - [x] 12.2 Configurar ponto de entrada da aplicação
     - Atualizar `src/main.tsx` com imports de estilos globais e BrowserRouter
     - Atualizar `index.html` com meta tags, título e link para fonte Inter
     - _Requirements: 8.1, 8.4_
 
-- [ ] 13. Checkpoint - Verificar integração completa
+- [x] 13. Checkpoint - Verificar integração completa
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 14. Testes baseados em propriedades (Property-Based Tests)
