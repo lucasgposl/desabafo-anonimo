@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { DesabafoCardProps, TipoReacao, Sentimento } from '../types';
 import { ComentarioSection } from './ComentarioSection';
+import { LinkVerMais } from './LinkVerMais';
 import './DesabafoCard.css';
 
 function formatarTempoRelativo(data: Date): string {
@@ -38,14 +38,8 @@ function obterCorSentimento(sentimento: Sentimento): string {
 }
 
 export function DesabafoCard({ desabafo, onReagir, usuarioAutenticado, reacaoAtiva, uid }: DesabafoCardProps) {
-  const [comentariosExpandidos, setComentariosExpandidos] = useState(false);
-
   const handleReagir = (tipo: TipoReacao) => {
     onReagir(tipo);
-  };
-
-  const toggleComentarios = () => {
-    setComentariosExpandidos((prev) => !prev);
   };
 
   return (
@@ -95,27 +89,18 @@ export function DesabafoCard({ desabafo, onReagir, usuarioAutenticado, reacaoAti
         </button>
       </div>
 
-      <div className="desabafo-card__comentarios-toggle">
-        <button
-          className="desabafo-card__comentarios-btn"
-          onClick={toggleComentarios}
-          aria-expanded={comentariosExpandidos}
-          aria-label={`Comentários (${desabafo.totalComentarios})`}
-        >
-          <span className="desabafo-card__comentarios-icone">💬</span>
-          <span className="desabafo-card__comentarios-label">
-            Comentários ({desabafo.totalComentarios})
-          </span>
-        </button>
-      </div>
-
-      {comentariosExpandidos && (
+      {desabafo.totalComentarios > 0 && (
         <div className="desabafo-card__comentarios-section">
           <ComentarioSection
             desabafoId={desabafo.id}
             usuarioAutenticado={usuarioAutenticado}
             uid={uid}
+            limite={5}
+            mostrarFormulario={false}
           />
+          {desabafo.totalComentarios > 5 && desabafo.numero != null && (
+            <LinkVerMais numero={desabafo.numero} />
+          )}
         </div>
       )}
     </article>

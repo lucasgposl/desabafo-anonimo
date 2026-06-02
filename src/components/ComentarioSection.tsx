@@ -30,7 +30,7 @@ function formatarTempoRelativo(data: Date): string {
   return `${dia}/${mes}/${ano}`;
 }
 
-export function ComentarioSection({ desabafoId, usuarioAutenticado, uid }: ComentarioSectionProps) {
+export function ComentarioSection({ desabafoId, usuarioAutenticado, uid, limite, mostrarFormulario = true }: ComentarioSectionProps) {
   const [comentarios, setComentarios] = useState<Comentario[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [texto, setTexto] = useState('');
@@ -49,7 +49,7 @@ export function ComentarioSection({ desabafoId, usuarioAutenticado, uid }: Comen
     let cancelado = false;
     setIsLoading(true);
 
-    buscarComentarios(desabafoId, 50)
+    buscarComentarios(desabafoId, limite ?? 10000)
       .then((resultado) => {
         if (!cancelado) {
           setComentarios(resultado);
@@ -65,7 +65,7 @@ export function ComentarioSection({ desabafoId, usuarioAutenticado, uid }: Comen
       });
 
     return () => { cancelado = true; };
-  }, [desabafoId]);
+  }, [desabafoId, limite]);
 
   const handleSubmeter = async () => {
     setFeedback(null);
@@ -136,49 +136,51 @@ export function ComentarioSection({ desabafoId, usuarioAutenticado, uid }: Comen
               </ul>
             )}
 
-            {usuarioAutenticado ? (
-              <div className="comentario-section__formulario">
-                <textarea
-                  className="comentario-section__textarea"
-                  placeholder="Escreva um comentário de apoio..."
-                  value={texto}
-                  onChange={(e) => setTexto(e.target.value)}
-                  disabled={isPublicando}
-                  maxLength={MAX_CARACTERES_COMENTARIO}
-                  aria-label="Texto do comentário"
-                />
-                <div className="comentario-section__controles">
-                  <span
-                    className={`comentario-section__contador ${
-                      caracteresRestantes < 50 ? 'comentario-section__contador--alerta' : ''
-                    }`}
-                    aria-live="polite"
-                  >
-                    {caracteresRestantes} caracteres restantes
-                  </span>
-                  <button
-                    className="comentario-section__botao-enviar"
-                    onClick={handleSubmeter}
+            {mostrarFormulario && (
+              usuarioAutenticado ? (
+                <div className="comentario-section__formulario">
+                  <textarea
+                    className="comentario-section__textarea"
+                    placeholder="Escreva um comentário de apoio..."
+                    value={texto}
+                    onChange={(e) => setTexto(e.target.value)}
                     disabled={isPublicando}
-                    aria-busy={isPublicando}
-                  >
-                    {isPublicando ? (
-                      <>
-                        <span className="comentario-section__btn-loading" aria-hidden="true" />
-                        Enviando...
-                      </>
-                    ) : (
-                      'Comentar'
-                    )}
-                  </button>
+                    maxLength={MAX_CARACTERES_COMENTARIO}
+                    aria-label="Texto do comentário"
+                  />
+                  <div className="comentario-section__controles">
+                    <span
+                      className={`comentario-section__contador ${
+                        caracteresRestantes < 50 ? 'comentario-section__contador--alerta' : ''
+                      }`}
+                      aria-live="polite"
+                    >
+                      {caracteresRestantes} caracteres restantes
+                    </span>
+                    <button
+                      className="comentario-section__botao-enviar"
+                      onClick={handleSubmeter}
+                      disabled={isPublicando}
+                      aria-busy={isPublicando}
+                    >
+                      {isPublicando ? (
+                        <>
+                          <span className="comentario-section__btn-loading" aria-hidden="true" />
+                          Enviando...
+                        </>
+                      ) : (
+                        'Comentar'
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="comentario-section__login-msg" role="status">
-                <p className="comentario-section__login-msg-texto">
-                  Faça login para comentar.
-                </p>
-              </div>
+              ) : (
+                <div className="comentario-section__login-msg" role="status">
+                  <p className="comentario-section__login-msg-texto">
+                    Faça login para comentar.
+                  </p>
+                </div>
+              )
             )}
 
             {feedback && (

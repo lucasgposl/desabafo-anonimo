@@ -91,41 +91,13 @@
   margin-left: 0.25rem;
 }
 
-.desabafo-card__comentarios-toggle {
-  border-top: 1px solid var(--cor-borda);
-  padding-top: 0.75rem;
-}
-
-.desabafo-card__comentarios-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.375rem 0;
-  transition: var(--transicao-padrao);
-  font-family: var(--fonte-familia);
-  font-size: var(--fonte-secundaria);
-  font-weight: var(--fonte-botao-peso);
-  color: var(--cor-texto-secundario);
-}
-
-.desabafo-card__comentarios-btn:hover {
-  color: var(--cor-acento);
-}
-
-.desabafo-card__comentarios-icone {
-  font-size: 1rem;
-}
-
-.desabafo-card__comentarios-label {
-  color: inherit;
-}
-
 .desabafo-card__comentarios-section {
-  border-top: 1px solid var(--cor-borda);
+  margin-top: 0.5rem;
   padding-top: 0.75rem;
+  border-top: 1px solid var(--cor-borda);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 @media (max-width: 720px) {

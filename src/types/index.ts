@@ -35,6 +35,7 @@ export interface Desabafo {
     pouco: number;
   };
   totalComentarios: number;
+  numero?: number;            // Número incremental para navegação via LinkVerMais
 }
 
 // Modelo para administradores (COM uid para moderação)
@@ -109,6 +110,8 @@ export interface ComentarioSectionProps {
   desabafoId: string;
   usuarioAutenticado: boolean;
   uid?: string | null;
+  limite?: number;              // Quantidade de comentários a buscar (undefined = todos)
+  mostrarFormulario?: boolean;  // Exibe formulário? (default: true)
 }
 
 // Props do FeedControls

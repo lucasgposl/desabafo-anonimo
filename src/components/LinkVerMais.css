@@ -1,0 +1,14 @@
+.link-ver-mais {
+  display: inline-block;
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-secundaria);
+  font-weight: var(--fonte-secundaria-peso);
+  color: var(--cor-texto-secundario);
+  text-decoration: none;
+  padding: 0.25rem 0;
+  transition: var(--transicao-padrao);
+}
+
+.link-ver-mais:hover {
+  color: var(--cor-acento);
+}
