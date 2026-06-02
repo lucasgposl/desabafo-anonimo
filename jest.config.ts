@@ -12,6 +12,21 @@ const config: Config = {
     '^.+\\.tsx?$': ['ts-jest', {
       tsconfig: 'tsconfig.json',
       useESM: false,
+      diagnostics: {
+        ignoreCodes: [1343],
+      },
+      astTransformers: {
+        before: [
+          {
+            path: 'ts-jest-mock-import-meta',
+            options: {
+              metaObjectReplacement: {
+                env: { DEV: true },
+              },
+            },
+          },
+        ],
+      },
     }],
   },
   moduleNameMapper: {

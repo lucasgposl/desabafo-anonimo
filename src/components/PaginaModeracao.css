@@ -90,6 +90,7 @@
 
 .pagina-moderacao__item {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 1rem;
   background-color: var(--cor-superficie);
@@ -182,6 +183,29 @@
   .pagina-moderacao__botao-remover {
     align-self: flex-end;
   }
+
+  .pagina-moderacao__busca {
+    flex-direction: column;
+  }
+
+  .pagina-moderacao__busca-input {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .pagina-moderacao__item-acoes {
+    justify-content: flex-end;
+  }
+
+  .pagina-moderacao__comentarios-inline {
+    padding-left: 0.75rem;
+  }
+
+  .pagina-moderacao__comentario-inline-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
 }
 
 /* Admin management */
@@ -229,5 +253,240 @@
 
 .pagina-moderacao__botao-adicionar-admin:disabled {
   opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Search bar */
+.pagina-moderacao__busca {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.pagina-moderacao__busca-input {
+  flex: 1;
+  min-width: 160px;
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-secundaria);
+  color: var(--cor-texto);
+  background-color: var(--cor-superficie-alt);
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.pagina-moderacao__busca-input:focus {
+  border-color: var(--cor-acento);
+  outline: none;
+}
+
+.pagina-moderacao__busca-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagina-moderacao__busca-botao {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-botao);
+  font-weight: var(--fonte-botao-peso);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: var(--transicao-padrao);
+  white-space: nowrap;
+}
+
+.pagina-moderacao__busca-botao:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagina-moderacao__busca-botao--buscar {
+  background-color: var(--cor-acento);
+  color: #ffffff;
+}
+
+.pagina-moderacao__busca-botao--buscar:hover:not(:disabled) {
+  background-color: var(--cor-acento-hover);
+}
+
+.pagina-moderacao__busca-botao--limpar {
+  background-color: transparent;
+  color: var(--cor-texto-secundario);
+  border: 1px solid var(--cor-borda);
+}
+
+.pagina-moderacao__busca-botao--limpar:hover:not(:disabled) {
+  background-color: var(--cor-superficie-alt);
+  color: var(--cor-texto);
+}
+
+.pagina-moderacao__busca-erro {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-secundaria);
+  color: var(--cor-erro);
+  margin: 0 0 0.75rem 0;
+}
+
+/* Item actions (toggle + remove button) */
+.pagina-moderacao__item-acoes {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* Desabafo toggle button */
+.pagina-moderacao__desabafo-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-secundaria);
+  font-weight: var(--fonte-botao-peso);
+  padding: 0.375rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--cor-borda);
+  cursor: pointer;
+  background-color: transparent;
+  color: var(--cor-texto);
+  transition: var(--transicao-padrao);
+  white-space: nowrap;
+}
+
+.pagina-moderacao__desabafo-toggle:hover:not(:disabled) {
+  background-color: var(--cor-superficie-alt);
+}
+
+.pagina-moderacao__desabafo-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Badge de comentários */
+.pagina-moderacao__badge-comentarios {
+  color: var(--cor-acento);
+  font-weight: var(--fonte-botao-peso);
+}
+
+.pagina-moderacao__badge-comentarios--vazio {
+  color: var(--cor-texto-secundario);
+  font-weight: normal;
+}
+
+/* Número do desabafo */
+.pagina-moderacao__numero {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-secundaria);
+  font-weight: var(--fonte-botao-peso);
+  color: var(--cor-acento);
+  margin-right: 0.5rem;
+}
+
+/* Comentários inline container */
+.pagina-moderacao__comentarios-inline {
+  width: 100%;
+  padding: 0.75rem 0 0 1.5rem;
+  border-top: 1px solid var(--cor-borda);
+  margin-top: 0.5rem;
+}
+
+.pagina-moderacao__erro-inline {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-secundaria);
+  color: var(--cor-erro);
+  margin: 0;
+}
+
+.pagina-moderacao__loading-inline {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-secundaria);
+  color: var(--cor-texto-secundario);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pagina-moderacao__loading-inline::before {
+  content: '';
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--cor-borda);
+  border-top-color: var(--cor-acento);
+  border-radius: 50%;
+  animation: spinner-rotate 0.6s linear infinite;
+}
+
+@keyframes spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pagina-moderacao__lista-comentarios-inline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pagina-moderacao__comentario-inline-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.pagina-moderacao__comentario-inline-item:last-child {
+  border-bottom: none;
+}
+
+.pagina-moderacao__comentario-inline-texto {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-secundaria);
+  color: var(--cor-texto);
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+/* Carregar mais button (Req 6.2, 6.4) */
+.pagina-moderacao__carregar-mais {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.pagina-moderacao__botao-carregar-mais {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-botao);
+  font-weight: var(--fonte-botao-peso);
+  padding: 0.625rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--cor-borda);
+  cursor: pointer;
+  background-color: transparent;
+  color: var(--cor-texto);
+  transition: var(--transicao-padrao);
+}
+
+.pagina-moderacao__botao-carregar-mais:hover:not(:disabled) {
+  background-color: var(--cor-superficie-alt);
+  border-color: var(--cor-acento);
+}
+
+.pagina-moderacao__botao-carregar-mais:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
 }

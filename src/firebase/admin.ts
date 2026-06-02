@@ -2,16 +2,19 @@ import {
   doc,
   getDoc,
   collection,
-  collectionGroup,
   query,
   orderBy,
+  limit,
+  startAfter,
+  where,
   getDocs,
   setDoc,
   deleteDoc,
   serverTimestamp,
+  type DocumentSnapshot,
 } from 'firebase/firestore';
 import { db } from './config';
-import type { DesabafoAdmin, ComentarioAdmin, DesabafoDoc, ComentarioDoc } from '../types';
+import type { DesabafoAdmin, DesabafoDoc } from '../types';
 
 const COLECAO_ADMINS = 'admins';
 const COLECAO_DESABAFOS = 'desabafos';
@@ -63,56 +66,64 @@ export async function buscarTodosAdmins(): Promise<{ uid: string; email: string;
   });
 }
 
+function mapDesabafoAdmin(docSnap: DocumentSnapshot): DesabafoAdmin {
+  const data = docSnap.data() as DesabafoDoc;
+  const mapped: DesabafoAdmin = {
+    id: docSnap.id,
+    texto: data.texto,
+    sentimento: data.sentimento,
+    criadoEm: data.criadoEm?.toDate() ?? new Date(),
+    reacoes: data.reacoes,
+    totalComentarios: data.totalComentarios ?? 0,
+    uid: data.uid,
+  };
+  // Include numero field when available (feature-003 dependency)
+  const rawData = docSnap.data() as Record<string, unknown>;
+  if (typeof rawData.numero === 'number') {
+    mapped.numero = rawData.numero;
+  }
+  return mapped;
+}
+
 /**
- * Busca todos os desabafos COM uid para a página de moderação.
+ * Busca desabafos COM uid para a página de moderação, com suporte a paginação por cursor.
  * Apenas administradores devem chamar esta função.
- * Retorna lista ordenada do mais recente para o mais antigo.
+ * Retorna lista ordenada do mais recente para o mais antigo (até `limite` itens) e o último documento
+ * para uso como cursor na próxima página.
  */
-export async function buscarTodosDesabafosAdmin(): Promise<DesabafoAdmin[]> {
+export async function buscarTodosDesabafosAdmin(
+  limite: number = 25,
+  cursor?: DocumentSnapshot
+): Promise<{ desabafos: DesabafoAdmin[]; ultimoDoc: DocumentSnapshot | null }> {
+  const constraints: Parameters<typeof query>[1][] = [
+    orderBy('criadoEm', 'desc'),
+    limit(limite),
+  ];
+  if (cursor) constraints.push(startAfter(cursor));
+  const q = query(collection(db, COLECAO_DESABAFOS), ...constraints);
+  const snapshot = await getDocs(q);
+
+  return {
+    desabafos: snapshot.docs.map(mapDesabafoAdmin),
+    ultimoDoc: snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1] : null,
+  };
+}
+
+/**
+ * Busca um desabafo pelo seu número incremental para a página de moderação.
+ * Apenas administradores devem chamar esta função.
+ * Requer index em `numero` (ASC) na coleção `desabafos` — compartilhado com feature-003.
+ * Retorna o desabafo encontrado ou null se não existir.
+ */
+export async function buscarDesabafoAdminPorNumero(numero: number): Promise<DesabafoAdmin | null> {
   const q = query(
     collection(db, COLECAO_DESABAFOS),
-    orderBy('criadoEm', 'desc')
+    where('numero', '==', numero)
   );
   const snapshot = await getDocs(q);
 
-  return snapshot.docs.map((docSnap) => {
-    const data = docSnap.data() as DesabafoDoc;
-    return {
-      id: docSnap.id,
-      texto: data.texto,
-      sentimento: data.sentimento,
-      criadoEm: data.criadoEm?.toDate() ?? new Date(),
-      reacoes: data.reacoes,
-      totalComentarios: data.totalComentarios ?? 0,
-      uid: data.uid,
-    };
-  });
+  if (snapshot.empty) return null;
+  return mapDesabafoAdmin(snapshot.docs[0]);
 }
 
-/**
- * Busca todos os comentários de todos os desabafos COM uid para a página de moderação.
- * Apenas administradores devem chamar esta função.
- * Retorna lista ordenada do mais recente para o mais antigo.
- */
-export async function buscarTodosComentariosAdmin(): Promise<ComentarioAdmin[]> {
-  const q = query(
-    collectionGroup(db, 'comentarios'),
-    orderBy('criadoEm', 'desc')
-  );
-  const snapshot = await getDocs(q);
 
-  return snapshot.docs.map((docSnap) => {
-    const data = docSnap.data() as ComentarioDoc;
-    // Extract desabafoId from the document path: desabafos/{desabafoId}/comentarios/{comentarioId}
-    const pathSegments = docSnap.ref.path.split('/');
-    const desabafoId = pathSegments[1];
-
-    return {
-      id: docSnap.id,
-      texto: data.texto,
-      criadoEm: data.criadoEm?.toDate() ?? new Date(),
-      desabafoId,
-      uid: data.uid,
-    };
-  });
-}

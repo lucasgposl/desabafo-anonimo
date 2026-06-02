@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
-import { buscarTodosDesabafosAdmin, buscarTodosComentariosAdmin, buscarTodosAdmins, adicionarAdmin, removerAdmin } from '../firebase/admin';
+import { buscarTodosDesabafosAdmin, buscarTodosAdmins, adicionarAdmin, removerAdmin, buscarDesabafoAdminPorNumero } from '../firebase/admin';
 import { removerDesabafo, apagarTodosDesabafos } from '../firebase/desabafos';
-import { removerComentario } from '../firebase/comentarios';
+import { removerComentario, buscarComentarios } from '../firebase/comentarios';
 import { ConfirmDialog } from './ConfirmDialog';
 import { formatarTempoRelativo } from '../utils/tempoRelativo';
-import type { DesabafoAdmin, ComentarioAdmin, PaginaModeracaoProps } from '../types';
+import type { DesabafoAdmin, Comentario, PaginaModeracaoProps } from '../types';
+import type { DocumentSnapshot } from 'firebase/firestore';
 import './PaginaModeracao.css';
+
+const LIMITE_MODERACAO = 25;
 
 type AcaoConfirmacao =
   | { tipo: 'remover-desabafo'; id: string }
@@ -14,7 +17,6 @@ type AcaoConfirmacao =
 
 export function PaginaModeracao({ isAdmin }: PaginaModeracaoProps) {
   const [desabafos, setDesabafos] = useState<DesabafoAdmin[]>([]);
-  const [comentarios, setComentarios] = useState<ComentarioAdmin[]>([]);
   const [admins, setAdmins] = useState<{ uid: string; email: string; criadoEm: Date }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -23,31 +25,34 @@ export function PaginaModeracao({ isAdmin }: PaginaModeracaoProps) {
   const [novoAdminUid, setNovoAdminUid] = useState('');
   const [isAdicionandoAdmin, setIsAdicionandoAdmin] = useState(false);
 
+  // Pagination states
+  const [lastDoc, setLastDoc] = useState<DocumentSnapshot | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  // Inline comments states
+  const [expandedDesabafoIds, setExpandedDesabafoIds] = useState<Set<string>>(new Set());
+  const [comentariosPorDesabafo, setComentariosPorDesabafo] = useState<Record<string, Comentario[]>>({});
+  const [loadingComentarios, setLoadingComentarios] = useState<Record<string, boolean>>({});
+  const [erroComentarios, setErroComentarios] = useState<Record<string, string>>({});
+
+  // Search states
+  const [buscaNumero, setBuscaNumero] = useState('');
+  const [modoBusca, setModoBusca] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [erroBusca, setErroBusca] = useState<string | null>(null);
+  const [resultadoBusca, setResultadoBusca] = useState<DesabafoAdmin[]>([]);
+
   const carregarDados = useCallback(async () => {
     setIsLoading(true);
     setErro(null);
     try {
       console.log('[Moderação] Iniciando carregamento...');
-      
-      let desabafosData: DesabafoAdmin[] = [];
-      let comentariosData: ComentarioAdmin[] = [];
+
       let adminsData: { uid: string; email: string; criadoEm: Date }[] = [];
 
-      try {
-        desabafosData = await buscarTodosDesabafosAdmin();
-        console.log('[Moderação] desabafos OK:', desabafosData.length);
-      } catch (e) {
-        console.error('[Moderação] FALHOU buscarTodosDesabafosAdmin:', e);
-        throw e;
-      }
-
-      try {
-        comentariosData = await buscarTodosComentariosAdmin();
-        console.log('[Moderação] comentarios OK:', comentariosData.length);
-      } catch (e) {
-        console.error('[Moderação] FALHOU buscarTodosComentariosAdmin:', e);
-        throw e;
-      }
+      const { desabafos: desabafosData, ultimoDoc } = await buscarTodosDesabafosAdmin(LIMITE_MODERACAO);
+      console.log('[Moderação] desabafos OK:', desabafosData.length);
 
       try {
         adminsData = await buscarTodosAdmins();
@@ -57,7 +62,8 @@ export function PaginaModeracao({ isAdmin }: PaginaModeracaoProps) {
       }
 
       setDesabafos(desabafosData);
-      setComentarios(comentariosData);
+      setLastDoc(ultimoDoc);
+      setHasMore(desabafosData.length === LIMITE_MODERACAO);
       setAdmins(adminsData);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -73,6 +79,98 @@ export function PaginaModeracao({ isAdmin }: PaginaModeracaoProps) {
       carregarDados();
     }
   }, [isAdmin, carregarDados]);
+
+  async function toggleDesabafo(id: string) {
+    if (expandedDesabafoIds.has(id)) {
+      // Collapse — no fetch
+      setExpandedDesabafoIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+      return;
+    }
+
+    // Expand
+    setExpandedDesabafoIds(prev => new Set(prev).add(id));
+
+    // Already loaded — reuse cache (Req 2.3)
+    if (comentariosPorDesabafo[id]) return;
+
+    // Clear any previous error on retry (Req 2.5)
+    if (erroComentarios[id]) {
+      setErroComentarios(prev => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    }
+
+    // First time or retry — fetch from Firestore (Req 2.2)
+    setLoadingComentarios(prev => ({ ...prev, [id]: true }));
+    try {
+      const dados = await buscarComentarios(id);
+      setComentariosPorDesabafo(prev => ({ ...prev, [id]: dados }));
+    } catch {
+      setErroComentarios(prev => ({ ...prev, [id]: 'Erro ao carregar comentários.' }));
+    } finally {
+      setLoadingComentarios(prev => ({ ...prev, [id]: false }));
+    }
+  }
+
+  async function carregarMais() {
+    if (isLoadingMore || !hasMore) return;
+
+    setIsLoadingMore(true);
+    try {
+      const { desabafos: novosDesabafos, ultimoDoc } = await buscarTodosDesabafosAdmin(
+        LIMITE_MODERACAO,
+        lastDoc ?? undefined
+      );
+      setDesabafos(prev => [...prev, ...novosDesabafos]);
+      setLastDoc(ultimoDoc);
+      setHasMore(novosDesabafos.length === LIMITE_MODERACAO);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[Moderação] Erro ao carregar mais:', err);
+      setErro(import.meta.env.DEV ? `Erro: ${msg}` : 'Erro ao carregar mais desabafos.');
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }
+
+  // Detect whether `numero` field is available in the loaded data (feature-003 dependency)
+  const numeroDisponivel = desabafos.some((d) => d.numero !== undefined);
+
+  async function handleBuscar() {
+    const valorTrimado = buscaNumero.trim();
+    const numero = parseInt(valorTrimado, 10);
+
+    if (!valorTrimado || isNaN(numero) || numero <= 0 || !Number.isInteger(numero)) {
+      setErroBusca('Digite um número inteiro positivo válido.');
+      return;
+    }
+
+    setErroBusca(null);
+    setIsSearching(true);
+    try {
+      const encontrado = await buscarDesabafoAdminPorNumero(numero);
+      setResultadoBusca(encontrado ? [encontrado] : []);
+      setModoBusca(true);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setErroBusca(import.meta.env.DEV ? `Erro na busca: ${msg}` : 'Erro ao buscar. Tente novamente.');
+    } finally {
+      setIsSearching(false);
+    }
+  }
+
+  function handleLimpar() {
+    setBuscaNumero('');
+    setModoBusca(false);
+    setErroBusca(null);
+    setResultadoBusca([]);
+  }
 
   const truncarTexto = (texto: string, limite: number = 100): string => {
     if (texto.length <= limite) return texto;
@@ -102,23 +200,65 @@ export function PaginaModeracao({ isAdmin }: PaginaModeracaoProps) {
         case 'remover-desabafo': {
           await removerDesabafo(acaoConfirmacao.id);
           setDesabafos((prev) => prev.filter((d) => d.id !== acaoConfirmacao.id));
-          setComentarios((prev) => prev.filter((c) => c.desabafoId !== acaoConfirmacao.id));
+          // Clean up inline comments state for removed desabafo
+          setComentariosPorDesabafo(prev => {
+            const next = { ...prev };
+            delete next[acaoConfirmacao.id];
+            return next;
+          });
+          setExpandedDesabafoIds(prev => {
+            const next = new Set(prev);
+            next.delete(acaoConfirmacao.id);
+            return next;
+          });
           break;
         }
         case 'remover-comentario': {
           await removerComentario(acaoConfirmacao.desabafoId, acaoConfirmacao.comentarioId);
-          setComentarios((prev) => prev.filter((c) => c.id !== acaoConfirmacao.comentarioId));
+          // Remove comment from inline list (Req 3.3)
+          setComentariosPorDesabafo(prev => ({
+            ...prev,
+            [acaoConfirmacao.desabafoId]: (prev[acaoConfirmacao.desabafoId] ?? []).filter(
+              c => c.id !== acaoConfirmacao.comentarioId
+            ),
+          }));
+          // Decrement badge count immediately (Req 5.2)
+          setDesabafos(prev =>
+            prev.map(d =>
+              d.id === acaoConfirmacao.desabafoId
+                ? { ...d, totalComentarios: Math.max(0, d.totalComentarios - 1) }
+                : d
+            )
+          );
+          // Also update search results if in search mode
+          if (modoBusca) {
+            setResultadoBusca(prev =>
+              prev.map(d =>
+                d.id === acaoConfirmacao.desabafoId
+                  ? { ...d, totalComentarios: Math.max(0, d.totalComentarios - 1) }
+                  : d
+              )
+            );
+          }
           break;
         }
         case 'apagar-tudo': {
           await apagarTodosDesabafos();
           setDesabafos([]);
-          setComentarios([]);
+          setComentariosPorDesabafo({});
+          setExpandedDesabafoIds(new Set());
+          setLastDoc(null);
+          setHasMore(false);
           break;
         }
       }
     } catch {
-      setErro('Erro ao remover. Tente novamente.');
+      if (acaoConfirmacao.tipo === 'remover-comentario') {
+        // Req 3.4: show error and keep the comment visible in the list
+        setErro('Erro ao remover comentário. O comentário foi mantido na lista.');
+      } else {
+        setErro('Erro ao remover. Tente novamente.');
+      }
     } finally {
       setAcaoConfirmacao(null);
     }
@@ -166,7 +306,7 @@ export function PaginaModeracao({ isAdmin }: PaginaModeracaoProps) {
         <button
           className="pagina-moderacao__botao-apagar-tudo"
           onClick={() => setAcaoConfirmacao({ tipo: 'apagar-tudo' })}
-          disabled={desabafos.length === 0 && comentarios.length === 0}
+          disabled={desabafos.length === 0}
           type="button"
         >
           Apagar tudo
@@ -175,16 +315,75 @@ export function PaginaModeracao({ isAdmin }: PaginaModeracaoProps) {
 
       <section className="pagina-moderacao__secao">
         <h2 className="pagina-moderacao__subtitulo">
-          Desabafos ({desabafos.length})
+          Desabafos ({desabafos.length}{hasMore ? '+' : ''})
         </h2>
-        {desabafos.length === 0 ? (
-          <p className="pagina-moderacao__vazio">Nenhum desabafo encontrado.</p>
-        ) : (
+
+        {/* Search bar */}
+        <div className="pagina-moderacao__busca">
+          <input
+            type="number"
+            placeholder={numeroDisponivel ? 'Buscar por número...' : 'Busca por número (disponível em breve)'}
+            value={buscaNumero}
+            onChange={(e) => {
+              setBuscaNumero(e.target.value);
+              setErroBusca(null);
+              if (!e.target.value) {
+                setModoBusca(false);
+                setResultadoBusca([]);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && numeroDisponivel) handleBuscar();
+            }}
+            disabled={!numeroDisponivel || isSearching}
+            className="pagina-moderacao__busca-input"
+            aria-label="Buscar desabafo por número"
+            min={1}
+          />
+          <button
+            type="button"
+            className="pagina-moderacao__busca-botao pagina-moderacao__busca-botao--buscar"
+            onClick={handleBuscar}
+            disabled={!numeroDisponivel || isSearching || !buscaNumero.trim()}
+          >
+            {isSearching ? 'Buscando...' : 'Buscar'}
+          </button>
+          <button
+            type="button"
+            className="pagina-moderacao__busca-botao pagina-moderacao__busca-botao--limpar"
+            onClick={handleLimpar}
+            disabled={!modoBusca && !buscaNumero}
+          >
+            Limpar
+          </button>
+        </div>
+        {erroBusca && (
+          <p className="pagina-moderacao__busca-erro" role="alert">
+            {erroBusca}
+          </p>
+        )}
+
+        {(() => {
+          const listaExibida = modoBusca ? resultadoBusca : desabafos;
+          if (modoBusca && listaExibida.length === 0) {
+            return (
+              <p className="pagina-moderacao__vazio">
+                Nenhum desabafo encontrado com o número informado.
+              </p>
+            );
+          }
+          if (!modoBusca && listaExibida.length === 0) {
+            return <p className="pagina-moderacao__vazio">Nenhum desabafo encontrado.</p>;
+          }
+          return (
           <ul className="pagina-moderacao__lista">
-            {desabafos.map((desabafo) => (
+            {listaExibida.map((desabafo) => (
               <li key={desabafo.id} className="pagina-moderacao__item">
                 <div className="pagina-moderacao__item-conteudo">
                   <p className="pagina-moderacao__item-texto">
+                    {desabafo.numero !== undefined && (
+                      <span className="pagina-moderacao__numero">#{desabafo.numero}</span>
+                    )}
                     {truncarTexto(desabafo.texto)}
                   </p>
                   <div className="pagina-moderacao__item-meta">
@@ -196,57 +395,89 @@ export function PaginaModeracao({ isAdmin }: PaginaModeracaoProps) {
                     </span>
                   </div>
                 </div>
-                <button
-                  className="pagina-moderacao__botao-remover"
-                  onClick={() => setAcaoConfirmacao({ tipo: 'remover-desabafo', id: desabafo.id })}
-                  type="button"
-                  aria-label={`Remover desabafo: ${truncarTexto(desabafo.texto, 30)}`}
-                >
-                  Remover
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section className="pagina-moderacao__secao">
-        <h2 className="pagina-moderacao__subtitulo">
-          Comentários ({comentarios.length})
-        </h2>
-        {comentarios.length === 0 ? (
-          <p className="pagina-moderacao__vazio">Nenhum comentário encontrado.</p>
-        ) : (
-          <ul className="pagina-moderacao__lista">
-            {comentarios.map((comentario) => (
-              <li key={comentario.id} className="pagina-moderacao__item">
-                <div className="pagina-moderacao__item-conteudo">
-                  <p className="pagina-moderacao__item-texto">
-                    {truncarTexto(comentario.texto)}
-                  </p>
-                  <div className="pagina-moderacao__item-meta">
-                    <span className="pagina-moderacao__data">
-                      {formatarData(comentario.criadoEm)}
+                <div className="pagina-moderacao__item-acoes">
+                  {/* Toggle button — fully styled in Task 4 */}
+                  <button
+                    type="button"
+                    className="pagina-moderacao__desabafo-toggle"
+                    onClick={() => toggleDesabafo(desabafo.id)}
+                    disabled={desabafo.totalComentarios === 0}
+                    aria-expanded={expandedDesabafoIds.has(desabafo.id)}
+                    aria-label={`${desabafo.totalComentarios} comentário${desabafo.totalComentarios !== 1 ? 's' : ''}`}
+                  >
+                    <span className={`pagina-moderacao__badge-comentarios${desabafo.totalComentarios === 0 ? ' pagina-moderacao__badge-comentarios--vazio' : ''}`}>
+                      {loadingComentarios[desabafo.id]
+                        ? 'carregando...'
+                        : `${desabafo.totalComentarios} comentário${desabafo.totalComentarios !== 1 ? 's' : ''}`}
                     </span>
-                  </div>
+                    {desabafo.totalComentarios > 0 && (
+                      <span aria-hidden="true">
+                        {expandedDesabafoIds.has(desabafo.id) ? ' ▼' : ' ▶'}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    className="pagina-moderacao__botao-remover"
+                    onClick={() => setAcaoConfirmacao({ tipo: 'remover-desabafo', id: desabafo.id })}
+                    type="button"
+                    aria-label={`Remover desabafo: ${truncarTexto(desabafo.texto, 30)}`}
+                  >
+                    Remover
+                  </button>
                 </div>
-                <button
-                  className="pagina-moderacao__botao-remover"
-                  onClick={() =>
-                    setAcaoConfirmacao({
-                      tipo: 'remover-comentario',
-                      desabafoId: comentario.desabafoId,
-                      comentarioId: comentario.id,
-                    })
-                  }
-                  type="button"
-                  aria-label={`Remover comentário: ${truncarTexto(comentario.texto, 30)}`}
-                >
-                  Remover
-                </button>
+                {/* Inline comments — rendered in Task 5/6 */}
+                {expandedDesabafoIds.has(desabafo.id) && (
+                  <div className="pagina-moderacao__comentarios-inline">
+                    {erroComentarios[desabafo.id] ? (
+                      <p className="pagina-moderacao__erro-inline" role="alert">
+                        {erroComentarios[desabafo.id]}
+                      </p>
+                    ) : loadingComentarios[desabafo.id] ? (
+                      <p className="pagina-moderacao__loading-inline">Carregando comentários...</p>
+                    ) : (comentariosPorDesabafo[desabafo.id] ?? []).length === 0 ? (
+                      <p className="pagina-moderacao__vazio">Nenhum comentário.</p>
+                    ) : (
+                      <ul className="pagina-moderacao__lista-comentarios-inline">
+                        {(comentariosPorDesabafo[desabafo.id] ?? []).map((comentario) => (
+                          <li key={comentario.id} className="pagina-moderacao__comentario-inline-item">
+                            <span className="pagina-moderacao__comentario-inline-texto">
+                              {truncarTexto(comentario.texto)} — {formatarData(comentario.criadoEm)}
+                            </span>
+                            <button
+                              type="button"
+                              className="pagina-moderacao__botao-remover"
+                              onClick={() => setAcaoConfirmacao({
+                                tipo: 'remover-comentario',
+                                desabafoId: desabafo.id,
+                                comentarioId: comentario.id,
+                              })}
+                              aria-label={`Remover comentário: ${truncarTexto(comentario.texto, 30)}`}
+                            >
+                              Remover
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
               </li>
             ))}
           </ul>
+          );
+        })()}
+
+        {!modoBusca && hasMore && (
+          <div className="pagina-moderacao__carregar-mais">
+            <button
+              type="button"
+              onClick={carregarMais}
+              disabled={isLoadingMore}
+              className="pagina-moderacao__botao-carregar-mais"
+            >
+              {isLoadingMore ? 'Carregando...' : `Carregar mais ${LIMITE_MODERACAO}`}
+            </button>
+          </div>
         )}
       </section>
 
@@ -254,7 +485,7 @@ export function PaginaModeracao({ isAdmin }: PaginaModeracaoProps) {
         <h2 className="pagina-moderacao__subtitulo">
           Administradores ({admins.length})
         </h2>
-        
+
         <div className="pagina-moderacao__admin-form">
           <input
             type="text"
@@ -337,3 +568,5 @@ export function PaginaModeracao({ isAdmin }: PaginaModeracaoProps) {
     </div>
   );
 }
+
+

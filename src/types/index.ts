@@ -40,6 +40,7 @@ export interface Desabafo {
 // Modelo para administradores (COM uid para moderação)
 export interface DesabafoAdmin extends Desabafo {
   uid: string;
+  numero?: number;            // Número incremental (disponível quando feature-003 estiver implementada)
 }
 
 // Documento no Firestore (subcoleção: "desabafos/{desabafoId}/comentarios")
