@@ -18,7 +18,7 @@ const config: Config = {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@components/(.*)$': '<rootDir>/src/components/$1',
     '^@hooks/(.*)$': '<rootDir>/src/hooks/$1',
-    '^@firebase/(.*)$': '<rootDir>/src/firebase/$1',
+    '^@fb/(.*)$': '<rootDir>/src/firebase/$1',
     '^@utils/(.*)$': '<rootDir>/src/utils/$1',
     '\\.(css|less|scss|sass)$': '<rootDir>/src/__mocks__/styleMock.ts',
   },

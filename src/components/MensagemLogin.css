@@ -1,0 +1,17 @@
+.mensagem-login {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--espacamento-card);
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--borda-radius-card);
+  text-align: center;
+}
+
+.mensagem-login__texto {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-corpo);
+  font-weight: var(--fonte-corpo-peso);
+  color: var(--cor-texto-secundario);
+  margin: 0;
+}

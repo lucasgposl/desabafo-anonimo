@@ -1,0 +1,60 @@
+.login-button {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-botao);
+  font-weight: var(--fonte-botao-peso);
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: var(--transicao-padrao);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.login-button--entrar {
+  background-color: var(--cor-acento);
+  color: #ffffff;
+}
+
+.login-button--entrar:hover {
+  background-color: var(--cor-acento-hover);
+}
+
+.login-button--sair {
+  background-color: transparent;
+  color: var(--cor-texto);
+  border: 1px solid var(--cor-borda);
+}
+
+.login-button--sair:hover {
+  border-color: var(--cor-acento);
+  color: var(--cor-acento);
+}
+
+.login-button--loading {
+  background-color: var(--cor-superficie-alt);
+  color: var(--cor-texto-secundario);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.login-button__loading-indicator {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--cor-texto-secundario);
+  border-top-color: var(--cor-acento);
+  border-radius: 50%;
+  animation: login-button-pulse 0.8s linear infinite;
+}
+
+@keyframes login-button-pulse {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

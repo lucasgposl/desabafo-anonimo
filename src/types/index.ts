@@ -90,6 +90,8 @@ export interface FeedProps {
   onLoadMore: () => void;
   onReagir: (id: string, tipo: TipoReacao) => void;
   usuarioAutenticado: boolean;
+  reacaoUsuario?: Record<string, TipoReacao | null>;
+  uid?: string | null;
 }
 
 // Props do DesabafoCard
@@ -97,12 +99,15 @@ export interface DesabafoCardProps {
   desabafo: Desabafo;
   onReagir: (tipo: TipoReacao) => void;
   usuarioAutenticado: boolean;
+  reacaoAtiva?: TipoReacao | null;
+  uid?: string | null;
 }
 
 // Props do ComentarioSection
 export interface ComentarioSectionProps {
   desabafoId: string;
   usuarioAutenticado: boolean;
+  uid?: string | null;
 }
 
 // Props do FeedControls

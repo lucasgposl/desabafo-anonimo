@@ -30,7 +30,7 @@
       "@/*": ["src/*"],
       "@components/*": ["src/components/*"],
       "@hooks/*": ["src/hooks/*"],
-      "@firebase/*": ["src/firebase/*"],
+      "@fb/*": ["src/firebase/*"],
       "@utils/*": ["src/utils/*"]
     }
   },

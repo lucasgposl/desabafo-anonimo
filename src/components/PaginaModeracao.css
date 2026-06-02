@@ -1,0 +1,233 @@
+.pagina-moderacao {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--espacamento-card);
+}
+
+.pagina-moderacao__titulo {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-titulo);
+  font-weight: var(--fonte-titulo-peso);
+  color: var(--cor-texto);
+  margin: 0 0 1.5rem 0;
+}
+
+.pagina-moderacao__loading {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-corpo);
+  color: var(--cor-texto-secundario);
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.pagina-moderacao__erro {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-secundaria);
+  color: var(--cor-texto);
+  background-color: var(--cor-erro);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.pagina-moderacao__acoes-globais {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+.pagina-moderacao__botao-apagar-tudo {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-botao);
+  font-weight: var(--fonte-botao-peso);
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background-color: var(--cor-erro);
+  color: var(--cor-texto);
+  transition: var(--transicao-padrao);
+}
+
+.pagina-moderacao__botao-apagar-tudo:hover:not(:disabled) {
+  background-color: #b52a40;
+  transform: scale(1.05);
+}
+
+.pagina-moderacao__botao-apagar-tudo:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagina-moderacao__secao {
+  margin-bottom: 2rem;
+}
+
+.pagina-moderacao__subtitulo {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-subtitulo);
+  font-weight: var(--fonte-subtitulo-peso);
+  color: var(--cor-texto);
+  margin: 0 0 1rem 0;
+}
+
+.pagina-moderacao__vazio {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-secundaria);
+  color: var(--cor-texto-secundario);
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.pagina-moderacao__lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pagina-moderacao__item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--borda-radius-card);
+  padding: 1rem;
+  box-shadow: var(--sombra-card);
+}
+
+.pagina-moderacao__item-conteudo {
+  flex: 1;
+  min-width: 0;
+}
+
+.pagina-moderacao__item-texto {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-secundaria);
+  color: var(--cor-texto);
+  margin: 0 0 0.5rem 0;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.pagina-moderacao__item-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.pagina-moderacao__sentimento {
+  font-family: var(--fonte-familia);
+  font-size: 0.75rem;
+  font-weight: var(--fonte-botao-peso);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  color: var(--cor-texto);
+}
+
+.pagina-moderacao__sentimento--triste {
+  background-color: var(--cor-tristeza);
+}
+
+.pagina-moderacao__sentimento--raiva {
+  background-color: var(--cor-raiva);
+}
+
+.pagina-moderacao__sentimento--alivio {
+  background-color: var(--cor-alivio);
+}
+
+.pagina-moderacao__data {
+  font-family: var(--fonte-familia);
+  font-size: 0.75rem;
+  color: var(--cor-texto-secundario);
+}
+
+.pagina-moderacao__botao-remover {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-botao);
+  font-weight: var(--fonte-botao-peso);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--cor-erro);
+  cursor: pointer;
+  background-color: transparent;
+  color: var(--cor-erro);
+  transition: var(--transicao-padrao);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.pagina-moderacao__botao-remover:hover {
+  background-color: var(--cor-erro);
+  color: var(--cor-texto);
+}
+
+/* Responsivo */
+@media (max-width: 720px) {
+  .pagina-moderacao {
+    padding: 1rem;
+  }
+
+  .pagina-moderacao__item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .pagina-moderacao__botao-remover {
+    align-self: flex-end;
+  }
+}
+
+/* Admin management */
+.pagina-moderacao__admin-form {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.pagina-moderacao__admin-input {
+  flex: 1;
+  min-width: 200px;
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-secundaria);
+  color: var(--cor-texto);
+  background-color: var(--cor-superficie-alt);
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.pagina-moderacao__admin-input:focus {
+  border-color: var(--cor-acento);
+  outline: none;
+}
+
+.pagina-moderacao__botao-adicionar-admin {
+  font-family: var(--fonte-familia);
+  font-size: var(--fonte-botao);
+  font-weight: var(--fonte-botao-peso);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background-color: var(--cor-acento);
+  color: #ffffff;
+  transition: var(--transicao-padrao);
+  white-space: nowrap;
+}
+
+.pagina-moderacao__botao-adicionar-admin:hover:not(:disabled) {
+  background-color: var(--cor-acento-hover);
+}
+
+.pagina-moderacao__botao-adicionar-admin:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

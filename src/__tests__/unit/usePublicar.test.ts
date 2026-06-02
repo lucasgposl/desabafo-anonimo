@@ -1,0 +1,214 @@
+/**
+ * Testes unitários para o hook usePublicar (src/hooks/usePublicar.ts)
+ * Validates: Requirements 1.3, 1.4, 1.7, 1.8, 1.9, 1.11
+ */
+
+import { renderHook, act } from '@testing-library/react';
+
+// Mocks
+const mockCriarDesabafo = jest.fn();
+
+jest.mock('../../firebase/desabafos', () => ({
+  criarDesabafo: (...args: unknown[]) => mockCriarDesabafo(...args),
+}));
+
+import { usePublicar } from '../../hooks/usePublicar';
+
+describe('usePublicar', () => {
+  const uid = 'user-123';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('Estado inicial', () => {
+    it('deve iniciar com isPublicando false e error null', () => {
+      const { result } = renderHook(() => usePublicar(uid));
+
+      expect(result.current.isPublicando).toBe(false);
+      expect(result.current.error).toBeNull();
+      expect(result.current.publicar).toBeInstanceOf(Function);
+    });
+  });
+
+  describe('Validação de texto (Req 1.7, 1.8)', () => {
+    it('deve rejeitar texto vazio e definir erro', async () => {
+      const { result } = renderHook(() => usePublicar(uid));
+
+      let retorno: unknown;
+      await act(async () => {
+        retorno = await result.current.publicar('', 'triste');
+      });
+
+      expect(retorno).toBeNull();
+      expect(result.current.error).toBe('Escreva algo antes de publicar!');
+      expect(mockCriarDesabafo).not.toHaveBeenCalled();
+    });
+
+    it('deve rejeitar texto composto apenas de espaços', async () => {
+      const { result } = renderHook(() => usePublicar(uid));
+
+      let retorno: unknown;
+      await act(async () => {
+        retorno = await result.current.publicar('   \t\n  ', 'raiva');
+      });
+
+      expect(retorno).toBeNull();
+      expect(result.current.error).toBe('Escreva algo antes de publicar!');
+      expect(mockCriarDesabafo).not.toHaveBeenCalled();
+    });
+
+    it('deve rejeitar texto com mais de 2000 caracteres', async () => {
+      const { result } = renderHook(() => usePublicar(uid));
+      const textoLongo = 'a'.repeat(2001);
+
+      let retorno: unknown;
+      await act(async () => {
+        retorno = await result.current.publicar(textoLongo, 'alivio');
+      });
+
+      expect(retorno).toBeNull();
+      expect(result.current.error).toBe('O texto deve ter no máximo 2000 caracteres.');
+      expect(mockCriarDesabafo).not.toHaveBeenCalled();
+    });
+
+    it('deve aceitar texto com exatamente 2000 caracteres', async () => {
+      mockCriarDesabafo.mockResolvedValue('doc-id-1');
+      const { result } = renderHook(() => usePublicar(uid));
+      const textoExato = 'a'.repeat(2000);
+
+      let retorno: unknown;
+      await act(async () => {
+        retorno = await result.current.publicar(textoExato, 'triste');
+      });
+
+      expect(retorno).not.toBeNull();
+      expect(mockCriarDesabafo).toHaveBeenCalled();
+    });
+  });
+
+  describe('Publicação com sucesso (Req 1.3, 1.4, 1.9)', () => {
+    it('deve chamar criarDesabafo com texto, sentimento e uid', async () => {
+      mockCriarDesabafo.mockResolvedValue('doc-id-abc');
+      const { result } = renderHook(() => usePublicar(uid));
+
+      await act(async () => {
+        await result.current.publicar('Meu desabafo', 'triste');
+      });
+
+      expect(mockCriarDesabafo).toHaveBeenCalledWith('Meu desabafo', 'triste', uid);
+    });
+
+    it('deve retornar o desabafo criado com dados corretos', async () => {
+      mockCriarDesabafo.mockResolvedValue('doc-id-xyz');
+      const { result } = renderHook(() => usePublicar(uid));
+
+      let retorno: unknown;
+      await act(async () => {
+        retorno = await result.current.publicar('Texto do desabafo', 'raiva');
+      });
+
+      expect(retorno).toEqual({
+        id: 'doc-id-xyz',
+        texto: 'Texto do desabafo',
+        sentimento: 'raiva',
+        criadoEm: expect.any(Date),
+        reacoes: { apoio: 0, forca: 0, pouco: 0 },
+        totalComentarios: 0,
+      });
+    });
+
+    it('deve definir isPublicando como true durante a publicação', async () => {
+      let resolvePromise: (value: string) => void;
+      mockCriarDesabafo.mockImplementation(
+        () => new Promise<string>((resolve) => { resolvePromise = resolve; })
+      );
+
+      const { result } = renderHook(() => usePublicar(uid));
+
+      let publicarPromise: Promise<unknown>;
+      act(() => {
+        publicarPromise = result.current.publicar('Texto', 'alivio');
+      });
+
+      // Durante a publicação
+      expect(result.current.isPublicando).toBe(true);
+
+      // Resolver a promise
+      await act(async () => {
+        resolvePromise!('doc-id');
+        await publicarPromise;
+      });
+
+      expect(result.current.isPublicando).toBe(false);
+    });
+
+    it('deve limpar erro anterior ao iniciar nova publicação', async () => {
+      // Primeiro, causar um erro
+      mockCriarDesabafo.mockRejectedValueOnce(new Error('Firestore error'));
+      const { result } = renderHook(() => usePublicar(uid));
+
+      await act(async () => {
+        await result.current.publicar('Texto válido', 'triste');
+      });
+
+      expect(result.current.error).toBe('Erro ao publicar. Tente novamente.');
+
+      // Segunda tentativa deve limpar o erro
+      mockCriarDesabafo.mockResolvedValueOnce('doc-id-2');
+
+      await act(async () => {
+        await result.current.publicar('Outro texto', 'raiva');
+      });
+
+      expect(result.current.error).toBeNull();
+    });
+  });
+
+  describe('Falha na publicação (Req 1.11)', () => {
+    it('deve definir erro quando criarDesabafo falha', async () => {
+      mockCriarDesabafo.mockRejectedValue(new Error('Network error'));
+      const { result } = renderHook(() => usePublicar(uid));
+
+      let retorno: unknown;
+      await act(async () => {
+        retorno = await result.current.publicar('Meu texto', 'alivio');
+      });
+
+      expect(retorno).toBeNull();
+      expect(result.current.error).toBe('Erro ao publicar. Tente novamente.');
+      expect(result.current.isPublicando).toBe(false);
+    });
+
+    it('deve retornar null em caso de falha', async () => {
+      mockCriarDesabafo.mockRejectedValue(new Error('Timeout'));
+      const { result } = renderHook(() => usePublicar(uid));
+
+      let retorno: unknown;
+      await act(async () => {
+        retorno = await result.current.publicar('Texto válido', 'triste');
+      });
+
+      expect(retorno).toBeNull();
+    });
+  });
+
+  describe('Diferentes sentimentos', () => {
+    it.each(['triste', 'raiva', 'alivio'] as const)(
+      'deve aceitar sentimento "%s"',
+      async (sentimento) => {
+        mockCriarDesabafo.mockResolvedValue(`doc-${sentimento}`);
+        const { result } = renderHook(() => usePublicar(uid));
+
+        let retorno: unknown;
+        await act(async () => {
+          retorno = await result.current.publicar('Texto', sentimento);
+        });
+
+        expect(retorno).toEqual(
+          expect.objectContaining({ sentimento })
+        );
+      }
+    );
+  });
+});

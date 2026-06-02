@@ -10,7 +10,6 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
       '@components': path.resolve(__dirname, './src/components'),
       '@hooks': path.resolve(__dirname, './src/hooks'),
-      '@firebase': path.resolve(__dirname, './src/firebase'),
       '@utils': path.resolve(__dirname, './src/utils'),
     },
   },
