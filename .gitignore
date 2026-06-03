@@ -1,1 +1,32 @@
-node_modules
+# Dependências
+node_modules/
+
+# Build output
+dist/
+
+# Variáveis de ambiente (contêm credenciais)
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Cache do Firebase CLI
+.firebase/
+
+# Arquivos temporários com credenciais
+firebase_tempe.md
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
