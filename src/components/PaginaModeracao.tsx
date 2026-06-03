@@ -10,6 +10,15 @@ import type { DesabafoAdmin, Comentario, PaginaModeracaoProps } from '../types';
 import type { DocumentSnapshot } from 'firebase/firestore';
 import './PaginaModeracao.css';
 
+function mascararEmail(email: string): string {
+  const [local, dominio] = email.split('@');
+  if (!local || !dominio) return '***@***';
+  const localMascarado = local.length <= 2
+    ? local[0] + '***'
+    : local[0] + '***' + local[local.length - 1];
+  return `${localMascarado}@***.***`;
+}
+
 const LIMITE_MODERACAO = 25;
 
 type AcaoConfirmacao =
@@ -530,7 +539,7 @@ export function PaginaModeracao({ isAdmin }: PaginaModeracaoProps) {
             {admins.map((admin) => (
               <li key={admin.uid} className="pagina-moderacao__item">
                 <div className="pagina-moderacao__item-conteudo">
-                  <p className="pagina-moderacao__item-texto">{admin.email}</p>
+                  <p className="pagina-moderacao__item-texto">{mascararEmail(admin.email)}</p>
                   <div className="pagina-moderacao__item-meta">
                     <span className="pagina-moderacao__data">UID: {admin.uid.slice(0, 12)}...</span>
                   </div>
@@ -538,7 +547,7 @@ export function PaginaModeracao({ isAdmin }: PaginaModeracaoProps) {
                 <button
                   className="pagina-moderacao__botao-remover"
                   onClick={async () => {
-                    if (!confirm(`Remover admin ${admin.email}?`)) return;
+                    if (!confirm(`Remover admin ${mascararEmail(admin.email)}?`)) return;
                     try {
                       await removerAdmin(admin.uid);
                       setAdmins((prev) => prev.filter((a) => a.uid !== admin.uid));
@@ -547,7 +556,7 @@ export function PaginaModeracao({ isAdmin }: PaginaModeracaoProps) {
                     }
                   }}
                   type="button"
-                  aria-label={`Remover admin: ${admin.email}`}
+                  aria-label={`Remover admin: ${mascararEmail(admin.email)}`}
                 >
                   Remover
                 </button>

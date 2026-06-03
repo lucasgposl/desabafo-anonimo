@@ -105,13 +105,18 @@
 
 .pagina-desabafo__texto {
   font-family: var(--fonte-familia);
-  font-size: var(--fonte-corpo);
+  font-size: 2rem;
   font-weight: var(--fonte-corpo-peso);
   color: var(--cor-texto);
   margin: 0;
-  line-height: 1.6;
+  line-height: 1.7;
   white-space: pre-wrap;
   word-break: break-word;
+  background: linear-gradient(135deg, var(--cor-superficie-alt), rgba(123, 104, 238, 0.06));
+  border: 1px solid var(--cor-borda);
+  border-radius: 12px;
+  padding: 1.5rem;
+  min-height: 160px;
 }
 
 .pagina-desabafo__reacoes {

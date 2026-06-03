@@ -10,18 +10,18 @@
 
 .input-box__textarea {
   font-family: var(--fonte-familia);
-  font-size: var(--fonte-corpo);
+  font-size: 1.75rem;
   font-weight: var(--fonte-corpo-peso);
   color: var(--cor-texto);
   background-color: var(--cor-superficie-alt);
   border: 1px solid var(--cor-borda);
   border-radius: 8px;
-  padding: 0.875rem;
-  min-height: 120px;
+  padding: 1rem 1.125rem;
+  min-height: 150px;
   resize: vertical;
   outline: none;
   transition: var(--transicao-padrao);
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .input-box__textarea::placeholder {
@@ -209,5 +209,38 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+
+.input-box__toast {
+  font-family: var(--fonte-familia);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--cor-texto);
+  background: linear-gradient(135deg, rgba(123, 104, 238, 0.15), rgba(123, 104, 238, 0.05));
+  border: 1px solid rgba(123, 104, 238, 0.3);
+  border-radius: 8px;
+  padding: 0.625rem 0.875rem;
+  text-align: center;
+  animation: input-box-toast 4s ease forwards;
+}
+
+@keyframes input-box-toast {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-4px);
   }
 }

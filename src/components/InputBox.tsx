@@ -1,8 +1,23 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { InputBoxProps, Sentimento } from '../types';
 import { SENTIMENTO_CONFIG, sentimentosPorCategoria, CATEGORIAS } from '../config/sentimentos';
 import { EMOJIS_EXPANDIDOS } from '../constants/emojis';
 import './InputBox.css';
+
+const PLACEHOLDERS_DIVERTIDOS = [
+  'Bota pra fora... o que tá te consumindo? 🔥',
+  'Conta tua história... sem julgamentos aqui 💬',
+  'Deixa aqui o que te fez sorrir hoje 😊',
+  'O que veio na sua cabeça na última noite? 🌙',
+  'Desabafa vai... aqui ninguém te conhece 🤫',
+  'Solta o verbo! Esse espaço é seu 🎤',
+  'Tá guardando isso há quanto tempo? Solta aqui ✨',
+  'Pode ser raiva, alegria, confusão... vale tudo 🎭',
+  'Aqui é zona livre de julgamento. Manda ver 🚀',
+  'Seu coração quer dizer algo? Deixa ele falar 💜',
+  'Escreve como se ninguém fosse ler... mas vão te abraçar 🤗',
+  'O que tá pesando? Divide com a gente 🫂',
+];
 
 export interface EmojiItem {
   char: string;
@@ -35,6 +50,29 @@ export function InputBox({ onPublicar, isPublicando }: InputBoxProps) {
   const [sentimento, setSentimento] = useState<Sentimento | null>(null);
   const [feedback, setFeedback] = useState<{ tipo: 'sucesso' | 'erro'; mensagem: string } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [placeholder, setPlaceholder] = useState(() => PLACEHOLDERS_DIVERTIDOS[Math.floor(Math.random() * PLACEHOLDERS_DIVERTIDOS.length)]);
+  const [toastVisivel, setToastVisivel] = useState(true);
+  const [toastFrase, setToastFrase] = useState(placeholder);
+
+  useEffect(() => {
+    // Toast desaparece após 4s, reaparece a cada 20s com nova frase
+    let hideTimer: ReturnType<typeof setTimeout>;
+    const showInterval = setInterval(() => {
+      const novaFrase = PLACEHOLDERS_DIVERTIDOS[Math.floor(Math.random() * PLACEHOLDERS_DIVERTIDOS.length)];
+      setToastFrase(novaFrase);
+      setPlaceholder(novaFrase);
+      setToastVisivel(true);
+      hideTimer = setTimeout(() => setToastVisivel(false), 4000);
+    }, 20000);
+
+    // Esconder o primeiro toast após 4s
+    hideTimer = setTimeout(() => setToastVisivel(false), 4000);
+
+    return () => {
+      clearInterval(showInterval);
+      clearTimeout(hideTimer);
+    };
+  }, []);
 
   const inserirEmoji = (emoji: string) => {
     const textarea = textareaRef.current;
@@ -97,10 +135,15 @@ export function InputBox({ onPublicar, isPublicando }: InputBoxProps) {
 
   return (
     <div className="input-box">
+      {toastVisivel && (
+        <div className="input-box__toast" aria-live="polite" key={toastFrase}>
+          {toastFrase}
+        </div>
+      )}
       <textarea
         ref={textareaRef}
         className="input-box__textarea"
-        placeholder="O que você está sentindo? Este é um espaço seguro para se expressar..."
+        placeholder={placeholder}
         value={texto}
         onChange={(e) => setTexto(e.target.value)}
         disabled={isPublicando}

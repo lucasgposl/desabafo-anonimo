@@ -50,7 +50,7 @@ Este spec define a substituição completa dos sentimentos e reações atuais do
 
 #### Critérios de Aceitação
 
-1. THE Sistema_Config SHALL definir as seguintes reações: `quem_nunca` (🙋 "Quem nunca"), `nao_julgo` (🤷 "Não julgo"), `se_ja_fiz_nao_me_lembro` (🫣 "Se já fiz não me lembro"), `tomara_que_passe` (🤞 "Tomara que passe"), `eu_ia_pior` (📈 "Eu ia pior"), `respira_fundo` (🧘 "Respira fundo"), `chama_no_particular` (📩 "Chama no particular"), `to_rindo_mas_e_de_nervoso` (😅 "Tô rindo mas é de nervoso").
+1. THE Sistema_Config SHALL definir as seguintes reações: `quem_nunca` (🙋 "Quem nunca"), `nao_julgo` (🤷 "Não julgo"), `se_ja_fiz_nao_me_lembro` (🫣 "Se já fiz não me lembro"), `tomara_que_passe` (🤞 "Tomara que passe"), `eu_ia_pior` (📈 "Eu ia pior"), `respira_fundo` (🧘 "Respira fundo"), `to_rindo_mas_e_de_nervoso` (😅 "Tô rindo mas é de nervoso").
 2. THE DesabafoCard SHALL exibir botões de reação para todas as 8 reações definidas no `REACAO_CONFIG`, na mesma ordem em que aparecem no objeto de configuração.
 3. WHEN um usuário clica em uma reação que ainda não selecionou naquele desabafo, THE DesabafoCard SHALL incrementar em 1 o contador da reação selecionada de forma otimista (antes da confirmação do Firestore) e destacar visualmente o botão como ativo.
 4. WHEN um usuário clica em uma reação diferente da que já selecionou naquele desabafo, THE DesabafoCard SHALL decrementar em 1 o contador da reação anterior, incrementar em 1 o contador da nova reação, e atualizar o destaque visual para a nova reação.

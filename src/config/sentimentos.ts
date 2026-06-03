@@ -43,7 +43,6 @@ export const REACAO_CONFIG = {
   tomara_que_passe: { label: 'Tomara que passe', emoji: '🤞' },
   eu_ia_pior: { label: 'Eu ia pior', emoji: '📈' },
   respira_fundo: { label: 'Respira fundo', emoji: '🧘' },
-  chama_no_particular: { label: 'Chama no particular', emoji: '📩' },
   to_rindo_mas_e_de_nervoso: { label: 'Tô rindo mas é de nervoso', emoji: '😅' },
 } as const satisfies Record<string, ReacaoEntry>;
 
